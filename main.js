@@ -16,12 +16,18 @@ var IMG = [TITLE_IMG, BACKGROUND_IMG, PLAYER_IMG, TAMA_IMG, BOSS_IMG, BOSS_TAMA_
 window.onload = function() {
 
   var core = new Core(960, 540);
+  //replaceSceneでメモリが増えないように, 現在のシーンに存在するノードを全て削除してからシーンを切り替える
+  core.replaceScene=function(scene) {
+    var currentScene = core.popScene();
+    while (currentScene.childNodes.length > 0) {
+      　currentScene.removeChild(currentScene.childNodes[0]);
+    }
+    return core.pushScene(scene);
+  }
   //画像ファイル読み込み
   core.preload(IMG);
   //fps設定
   core.fps = 30;
-  //プレイヤーの最高スピード
-  var playerMaxSpeed = 7;
   //ショットのキーバインド
   core.keybind( 'X'.charCodeAt(0), 'a' );
 
@@ -38,16 +44,11 @@ window.onload = function() {
           this.playFlag = true; //ゲームプレイ中（ボス未撃破）かどうか判定する変数
           this.x = 100;
           this.y = core.height/2;
-          this.move(this.x, this.y);
           this.lifeLabel(scene);
-          this.addEventListener('enterframe', function(){
-            this.move(this.x, this.y);
-          });
           scene.addChild(this);
         },
-        //自機がobj(敵)と当たったか判定するメソッド
+        //自機がobj(敵)と当たったか判定するメソッド (sceneのイベントリスナー内で呼び出すこと)
         hit: function(obj, scene){
-          scene.addEventListener('enterframe', function(){
             //ライフのあるobjに当たった場合
             if (player.intersect(obj) && obj.life > 0) {
               //自機のライフがまだある時
@@ -61,25 +62,6 @@ window.onload = function() {
                 scene.removeChild(player);
               }
             }
-          });
-        },
-        //自機がobj(敵弾)と当たったか判定するメソッド
-        hitBullet: function(obj, scene){
-          scene.addEventListener('enterframe', function(){
-            //objに当たった場合
-            if (player.intersect(obj) && player.playFlag == true) {
-              //自機のライフがまだある時
-              if (player.life - 1 > 0 && (player.barrier == false)) {
-                player.damage();        //ダメージアクション
-                scene.removeChild(player.myLifeLabel[player.life]);
-              //自機のライフが0になる時
-            }else if(player.life - 1 == 0 && (player.barrier == false)){
-                player.life -= 1;
-                scene.removeChild(player.myLifeLabel[0]);
-                scene.removeChild(player);
-              }
-            }
-          });
         },
         //ダメージを受けた時(ライフがある時)
         damage: function(){
@@ -113,6 +95,7 @@ window.onload = function() {
         },
         //プレイヤーの動き方
         move: function(x, y){
+          var playerMaxSpeed = 7;     //プレイヤーの最高スピード
           if(this.playFlag == true){
             if (core.input.left) {
               if (x >= 0) {
@@ -149,38 +132,37 @@ window.onload = function() {
           this.y = y + 9;         //数字は発射位置の調整
           this.speed = 20;        //弾の進むスピード
           this.interval = 100;    //連射間隔
-          this.addEventListener('enterframe', function(){
+          this.addEventListener('enterframe', function(){ //このイベントリスナーは必須
             this.x += this.speed;
             if (this.x > 960) {
               this.delete(scene);
             }
+            this.hit(scene);
           });
           scene.addChild(this);
         },
-        //弾がobj(ボス)と当たったか判定するメソッド
-        hit: function(obj){
-          this.addEventListener('enterframe', function(){
+        //弾がボスと当たったか判定するメソッド
+        hit: function(scene){
             //objに当たった場合
-            if (this.intersect(obj)) {
+            if (this.intersect(boss)) {
               //objのlifeがある時
-              if (obj.life > 0 && (obj.barrier == false)) {
+              if (boss.life > 0 && (boss.barrier == false)) {
                 //プレイヤーのライフがある時（ゲームオーバー後に当たった弾でボスのライフが削れるのを防ぐため）
                 if (player.life > 0) {
-                  obj.frame = 1;  //ダメージ受けた時のボスの画像
-                  obj.life -= 1;  //ボスのライフを１削る
+                  boss.frame = 1;  //ダメージ受けた時のボスの画像
+                  boss.life -= 1;  //ボスのライフを１削る
                 }
-                this.remove();
+                this.delete(scene);
                 setTimeout(function(){
                   //弾ヒット後に無敵状態に入った場合の対処法
-                  if (obj.barrier == false) {
-                    obj.frame = 0;
-                  } else if(obj.barrier == true){
-                    obj.frame = 2;
+                  if (boss.barrier == false) {
+                    boss.frame = 0;
+                  } else if(boss.barrier == true){
+                    boss.frame = 2;
                   }
                 }, 2000);
               }
             }
-          });
         },
         //消去するメソッド
         delete: function(scene){
@@ -197,7 +179,6 @@ window.onload = function() {
           this.image = core.assets[BOSS_IMG];
           this.frame = 0;
           this.center = (core.height - this.height)/2;
-          //this.scale(3);
           this.x = 700;
           this.y = this.center;
           this.life = 80;    //ボスの体力
@@ -205,13 +186,6 @@ window.onload = function() {
           this.ransha = false;    //パターン２のときかどうか
           this.ranshaTime = 120;
           this.ranshaEnd = true;
-          //イベントリスナー
-          this.addEventListener('enterframe', function(){
-            //体力が0になったら消滅
-            if (this.life == 0) {
-                this.delete(scene);
-            }
-          });
           scene.addChild(this);
         },
         move: function(pattern){
@@ -289,6 +263,7 @@ window.onload = function() {
         },
         onFrame: function(scene, xAngle, yAngle){
           this.addEventListener('enterframe', function(){
+            this.hitBullet(scene);
             if (boss.ransha == false && boss.ranshaEnd == true) {
               this.x -= this.speed;
             }else if(boss.ransha == false && boss.ranshaEnd == false){
@@ -312,6 +287,23 @@ window.onload = function() {
               }
           });
         },
+        //敵弾がプレイヤーと当たったか判定するメソッド
+        hitBullet: function(scene){
+            //プレイヤーに当たった場合
+            if (this.intersect(player) && player.playFlag == true) {
+              //プレイヤーのライフがまだある時
+              if (player.life - 1 > 0 && (player.barrier == false)) {
+                player.damage();        //ダメージアクション
+                scene.removeChild(player.myLifeLabel[player.life]); //ライフ表示を１減らす
+                this.delete(scene);     //敵弾を消去
+              //プレイヤーのライフが0になる時
+            }else if(player.life - 1 == 0 && (player.barrier == false)){
+                player.life -= 1;
+                scene.removeChild(player.myLifeLabel[0]);
+                scene.removeChild(player);
+              }
+            }
+          },
         //消去するメソッド
         delete: function(scene){
           scene.removeChild(this);
@@ -352,15 +344,16 @@ window.onload = function() {
       //ボスの動き方パターンを配列に格納（[0, 1, 0, 1, 2]のループ)
       bossPattern = [];
       var j = 0;
-      for (var i = 0; i < 50; i++) {    //パターン0とパターン1の繰り返しを入れる
+      for (var i = 0; i < 48; i++) {    //パターン0とパターン1の繰り返しを入れる
         bossPattern[i] = j;
         if (j == 1) j = -1;
         j++;
       }
-      for (var i = 0; i < 50; i+=5) {
+      for (var i = 0; i <= 60; i+=5) {
         bossPattern.splice( i, 0, 2);   //５つごとにパターン2を挿入
       }
       bossPattern.shift();  //先頭に挿入したパターン2を消す
+      console.log(bossPattern);
       //敵の体力表示（バー）
       var bossLifeLabel = new Sprite(10,15);
       bossLifeLabel.x=(core.width-boss.life * 10)/2;
@@ -378,6 +371,7 @@ window.onload = function() {
       var ranTama2 = 0;
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
+        player.move(player.x, player.y);
         player.hit(boss, scene);
         //ボタンを押したら自弾発射(ボス登場シーン終了後 ＆ プレイヤーのライフあり & プレイヤー無敵時間以外 & 連射感覚守る)
         if (core.input.a && boss.age > bossAppearTime && player.life > 0 && player.barrier == false && flag == true) {
@@ -411,11 +405,6 @@ window.onload = function() {
             }
           }, 1000 * 50/core.fps);
         }
-          player.hitBullet(enemyTama, scene);
-          if (boss.ransha == true) {
-            player.hitBullet(ranTama, scene);
-            player.hitBullet(ranTama2, scene);
-          }
       //ゲームオーバーシーン ここから　//
       //  ゲームオーバー画面の表示    //
         if (player.life == 0) {
@@ -434,9 +423,10 @@ window.onload = function() {
           }, 3000)
         }
       // ゲームオーバーシーン ここまで //
-      //                          //
+
       //ゲームクリアシーン
         if (boss.life == 0 && gameClearFlag == false && player.life > 0) {
+          boss.delete(scene);
           gameClearFlag = true;
           player.playFlag = false;
           //自機のアニメーション
@@ -447,7 +437,7 @@ window.onload = function() {
         }
       });
 
-        //ボスの動き方を順に呼び出す
+        //ボス登場後、ボスの動き方を順に呼び出す
         setTimeout(function(){
           bossPattern.forEach(function(value){
             boss.move(value, boss, scene);
@@ -455,39 +445,6 @@ window.onload = function() {
         }, bossAppearTime / core.fps)
           return scene;
         };
-
-    //スタート画面
-    var createGameStartScene = function(){
-      var scene = new Scene();
-      var backGround = new Sprite(960, 540);
-      backGround.image = core.assets[BACKGROUND_IMG];
-      scene.addChild(backGround);
-      //タイトル文字
-      var title = new Sprite(645,90);
-      title.image = core.assets[TITLE_IMG];
-      title.x = (scene.width - title.width) / 2;
-      title.y = 100;
-      scene.addChild(title);
-      //操作説明
-      var howToPlay = new Label("ショット：Xキー , 移動：十字キー");
-      howToPlay.width = 400;
-      howToPlay.x = scene.width / 2 - howToPlay.width /2;
-      howToPlay.y = 250;
-      howToPlay.color = 'white';
-      howToPlay.font = '24px "Arial"';
-      scene.addChild(howToPlay);
-      //スタートボタン
-      var button = new Button("Play!", "light");
-      button.x = scene.width / 2 - 80;
-      button.y = 350;
-      button.scale(2);
-      scene.addChild(button);
-
-      button.ontouchstart = function(){
-        core.replaceScene(createGameScene());
-      }
-      return scene;
-    }
 
     //ゲームクリア画面
     var createGameClearScene = function(player, gameScene){
@@ -522,6 +479,46 @@ window.onload = function() {
           core.replaceScene(createGameStartScene());
         }
         return scene;
+    }
+
+    //スタート画面
+    var createGameStartScene = function(){
+      var scene = new Scene();
+      var backGround = new Sprite(960, 540);
+      backGround.image = core.assets[BACKGROUND_IMG];
+      scene.addChild(backGround);
+      //タイトル文字
+      var title = new Sprite(645,90);
+      title.image = core.assets[TITLE_IMG];
+      title.x = (scene.width - title.width) / 2;
+      title.y = 100;
+      scene.addChild(title);
+      //操作説明
+      var howToPlay = new Label("ショット：Xキー , 移動：十字キー");
+      howToPlay.width = 400;
+      howToPlay.x = scene.width / 2 - howToPlay.width /2;
+      howToPlay.y = 250;
+      howToPlay.color = 'white';
+      howToPlay.font = '24px "Arial"';
+      scene.addChild(howToPlay);
+      //バージョン表示
+      var verLabel = new Label("Ver. 1.1")  //更新したら書き換える！！
+      verLabel.x = 10;
+      verLabel.y = 10;
+      verLabel.color = 'white';
+      verLabel.font = '12px "Arial"';
+      scene.addChild(verLabel);
+      //スタートボタン
+      var button = new Button("Play!", "light");
+      button.x = scene.width / 2 - 80;
+      button.y = 350;
+      button.scale(2);
+      scene.addChild(button);
+
+      button.ontouchstart = function(){
+        core.replaceScene(createGameScene());
+      }
+      return scene;
     }
 
     //0からnまでの乱数を生成する関数
