@@ -14,16 +14,16 @@ var CLEAR_IMG = './image/clear.png'
 var ALLCLEAR_IMG = './image/congratulations.png'
 
 //ゲームで使用するBGM＆効果音
-var STAGE1_PRE_BGM = 'sound/night/night1.mp3'
-var STAGE1_LOOP_BGM = 'sound/night/night2.mp3'
-var STAGE2_PRE_BGM = 'sound/strained/pre.mp3'
-var STAGE2_LOOP_BGM = 'sound/strained/loop.mp3'
-var STAGE3_PRE_BGM = 'sound/confront/pre.mp3'
-var STAGE3_LOOP_BGM = 'sound/confront/loop.mp3'
-var BOSS_DEAD_SE = 'sound/gun.mp3'
-var BOSS_DAMAGE_SE = 'sound/hit1.mp3'
-var PLAYER_DEAD_SE = 'sound/taihou.mp3'
-var PLAYER_DAMAGE_SE = 'sound/bomb3.mp3'
+var STAGE1_PRE_BGM = './sound/night/night1.mp3'
+var STAGE1_LOOP_BGM = './sound/night/night2.mp3'
+var STAGE2_PRE_BGM = './sound/strained/pre.mp3'
+var STAGE2_LOOP_BGM = './sound/strained/loop.mp3'
+var STAGE3_PRE_BGM = './sound/confront/pre.mp3'
+var STAGE3_LOOP_BGM = './sound/confront/loop.mp3'
+var BOSS_DEAD_SE = './sound/gun.mp3'
+var BOSS_DAMAGE_SE = './sound/hit1.mp3'
+var PLAYER_DEAD_SE = './sound/taihou.mp3'
+var PLAYER_DAMAGE_SE = './sound/bomb3.mp3'
 
 var IMG = [TITLE_IMG, BACKGROUND_IMG, PLAYER_IMG, PLAYER_DEAD_IMG, TAMA_IMG, BOSS_IMG, BOSS_TAMA_IMG, MYLIFE_IMG, GAMEOVER_IMG, CLEAR_IMG, ALLCLEAR_IMG];
 var BGM = [STAGE1_PRE_BGM, STAGE1_LOOP_BGM, STAGE2_PRE_BGM, STAGE2_LOOP_BGM, STAGE3_PRE_BGM, STAGE3_LOOP_BGM]
@@ -90,9 +90,7 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
-        setTimeout(function () {
-          stageBgm.volume = 0.07 + core.masterBgm;
-        },10)
+        stageBgm.volume = 0.07 + core.masterBgm;
       },
       stage1LoopBgm: function(on) {
         var stageBgm = core.assets[STAGE1_LOOP_BGM];
@@ -563,7 +561,6 @@ window.onload = function() {
                 }
                 break;
               case 2:
-              var volume = 0.13 + core.masterBgm;
               if (boss.age - bossAppearTime < 20 * core.fps) {
                 sound.stage2PreBgm(0);
               } else if (boss.age - bossAppearTime > 20.1 * core.fps){
@@ -571,7 +568,6 @@ window.onload = function() {
               }
                 break;
               case 3:
-              var volume = 0.13 + core.masterBgm;
               if (boss.age - bossAppearTime < 49 * core.fps) {
                 sound.stage3PreBgm(0);
               } else if (boss.age - bossAppearTime > 50 * core.fps){
