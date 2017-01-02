@@ -14,19 +14,16 @@ var CLEAR_IMG = './image/clear.png'
 var ALLCLEAR_IMG = './image/congratulations.png'
 
 //ゲームで使用するBGM＆効果音
-var STAGE1_PRE_BGM = './sound/night/night1.mp3'
-var STAGE1_LOOP_BGM = './sound/night/night2.mp3'
-var STAGE2_PRE_BGM = './sound/strained/pre.mp3'
-var STAGE2_LOOP_BGM = './sound/strained/loop.mp3'
-var STAGE3_PRE_BGM = './sound/confront/pre.mp3'
-var STAGE3_LOOP_BGM = './sound/confront/loop.mp3'
+var STAGE1_BGM = './sound/night3.mp3'
+var STAGE2_BGM = './sound/strained.mp3'
+var STAGE3_BGM = './sound/confront.mp3'
 var BOSS_DEAD_SE = './sound/gun.mp3'
 var BOSS_DAMAGE_SE = './sound/hit1.mp3'
 var PLAYER_DEAD_SE = './sound/taihou.mp3'
 var PLAYER_DAMAGE_SE = './sound/bomb3.mp3'
 
 var IMG = [TITLE_IMG, BACKGROUND_IMG, PLAYER_IMG, PLAYER_DEAD_IMG, TAMA_IMG, BOSS_IMG, BOSS_TAMA_IMG, MYLIFE_IMG, GAMEOVER_IMG, CLEAR_IMG, ALLCLEAR_IMG];
-var BGM = [STAGE1_PRE_BGM, STAGE1_LOOP_BGM, STAGE2_PRE_BGM, STAGE2_LOOP_BGM, STAGE3_PRE_BGM, STAGE3_LOOP_BGM]
+var BGM = [STAGE1_BGM, STAGE2_BGM, STAGE3_BGM]
 var SE = [BOSS_DEAD_SE, BOSS_DAMAGE_SE, PLAYER_DEAD_SE, PLAYER_DAMAGE_SE];
 
 window.onload = function() {
@@ -81,72 +78,72 @@ window.onload = function() {
         bossDeadBgm.play();     //ボス消滅BGM再生
         bossDeadBgm.volume = 0.04 + core.masterSe;
       },
-      stage1PreBgm: function(on) {
-        var stageBgm = core.assets[STAGE1_PRE_BGM];
-        if (on == 0) {
-          stageBgm.play();
-        } else if (on == 1) {
-          stageBgm.pause();
-        } else if (on == 2) {
-          stageBgm.stop();
-        }
-        stageBgm.volume = 0.07 + core.masterBgm;
-      },
-      stage1LoopBgm: function(on) {
-        var stageBgm = core.assets[STAGE1_LOOP_BGM];
-        if (on == 0) {
-          stageBgm.play();
-        } else if (on == 1) {
-          stageBgm.pause();
-        } else if (on == 2) {
-          stageBgm.stop();
-        }
-        stageBgm.volume = 0.07 + core.masterBgm;
-      },
-      stage2PreBgm: function(on) {
-        var stageBgm = core.assets[STAGE2_PRE_BGM];
-        if (on == 0) {
-          stageBgm.play();
-        } else if (on == 1) {
-          stageBgm.pause();
-        } else if (on == 2) {
-          stageBgm.stop();
-        }
-        stageBgm.volume = 0.13 + core.masterBgm;
-      },
-      stage2LoopBgm: function(on) {
-        var stageBgm = core.assets[STAGE2_LOOP_BGM];
-        if (on == 0) {
-          stageBgm.play();
-        } else if (on == 1) {
-          stageBgm.pause();
-        } else if (on == 2) {
-          stageBgm.stop();
-        }
-        stageBgm.volume = 0.13 + core.masterBgm;
-      },
-      stage3PreBgm: function(on) {
-        var stageBgm = core.assets[STAGE3_PRE_BGM];
-        if (on == 0) {
-          stageBgm.play();
-        } else if (on == 1) {
-          stageBgm.pause();
-        } else if (on == 2) {
-          stageBgm.stop();
-        }
-        stageBgm.volume = 0.13 + core.masterBgm;
-      },
-      stage3LoopBgm: function(on) {
-        var stageBgm = core.assets[STAGE3_LOOP_BGM];
-        if (on == 0) {
-          stageBgm.play();
-        } else if (on == 1) {
-          stageBgm.pause();
-        } else if (on == 2) {
-          stageBgm.stop();
-        }
-        stageBgm.volume = 0.13 + core.masterBgm;
-      }
+      // stage1PreBgm: function(on) {
+      //   var stageBgm = core.assets[STAGE1_PRE_BGM];
+      //   if (on == 0) {
+      //     stageBgm.play();
+      //   } else if (on == 1) {
+      //     stageBgm.pause();
+      //   } else if (on == 2) {
+      //     stageBgm.stop();
+      //   }
+      //   stageBgm.volume = 0.07 + core.masterBgm;
+      // },
+      // stage1LoopBgm: function(on) {
+      //   var stageBgm = core.assets[STAGE1_LOOP_BGM];
+      //   if (on == 0) {
+      //     stageBgm.play();
+      //   } else if (on == 1) {
+      //     stageBgm.pause();
+      //   } else if (on == 2) {
+      //     stageBgm.stop();
+      //   }
+      //   stageBgm.volume = 0.07 + core.masterBgm;
+      // },
+      // stage2PreBgm: function(on) {
+      //   var stageBgm = core.assets[STAGE2_PRE_BGM];
+      //   if (on == 0) {
+      //     stageBgm.play();
+      //   } else if (on == 1) {
+      //     stageBgm.pause();
+      //   } else if (on == 2) {
+      //     stageBgm.stop();
+      //   }
+      //   stageBgm.volume = 0.13 + core.masterBgm;
+      // },
+      // stage2LoopBgm: function(on) {
+      //   var stageBgm = core.assets[STAGE2_LOOP_BGM];
+      //   if (on == 0) {
+      //     stageBgm.play();
+      //   } else if (on == 1) {
+      //     stageBgm.pause();
+      //   } else if (on == 2) {
+      //     stageBgm.stop();
+      //   }
+      //   stageBgm.volume = 0.13 + core.masterBgm;
+      // },
+      // stage3PreBgm: function(on) {
+      //   var stageBgm = core.assets[STAGE3_PRE_BGM];
+      //   if (on == 0) {
+      //     stageBgm.play();
+      //   } else if (on == 1) {
+      //     stageBgm.pause();
+      //   } else if (on == 2) {
+      //     stageBgm.stop();
+      //   }
+      //   stageBgm.volume = 0.13 + core.masterBgm;
+      // },
+      // stage3LoopBgm: function(on) {
+      //   var stageBgm = core.assets[STAGE3_LOOP_BGM];
+      //   if (on == 0) {
+      //     stageBgm.play();
+      //   } else if (on == 1) {
+      //     stageBgm.pause();
+      //   } else if (on == 2) {
+      //     stageBgm.stop();
+      //   }
+      //   stageBgm.volume = 0.13 + core.masterBgm;
+      // }
     };
 
     //プレイヤーを作成するクラス
@@ -518,12 +515,18 @@ window.onload = function() {
         bossPattern[i+3] = 1;
         bossPattern[i+4] = 2;
       }
-      //各ステージのボスの体力を設定
+      //ステージのBGMと各ステージのボスの体力を設定
       if (stageNumber == 1) {
+        var stageBgm = core.assets[STAGE1_BGM];
+        var stageBgmNum = 22.8;
         boss.life = 60;    //ステージ１のボスの体力
       } else if (stageNumber == 2) {
+        var stageBgm = core.assets[STAGE2_BGM];
+        var stageBgmNum = 20.4;
         boss.life = 70;   //ステージ２のボスの体力
       } else if (stageNumber == 3) {
+        var stageBgm = core.assets[STAGE3_BGM];
+        var stageBgmNum = 50;
         boss.life = 90;   //ステージ３のボスの体力
       }
       //プレイヤーのライフ表示
@@ -545,38 +548,34 @@ window.onload = function() {
       var ranTama = 0;
       var ranTama2 = 0;
       var pauseFlag = false;
+      //ステージのBGMを流す(ゲームオーバー&ゲームクリア以外)
+      // if (boss.age > bossAppearTime && gameoverFlag == false && gameClearFlag == false) {
+      //     if (boss.age - bossAppearTime < stageBgm1Num * core.fps ) {
+      //       stageBgm1.play();
+      //     } else if (boss.age - bossAppearTime > stageBgm2Num * core.fps){
+      //       stageBgm2.play();
+      //     }
+      setTimeout(function(){
+        stageBgm.play();
+        switch (stageNumber) {
+          case 1:
+            stageBgm.volume = 0.07;
+            break;
+          case 2:
+            stageBgm.volume = 0.13;
+            break;
+          case 3:
+            stageBgm.volume = 0.13;
+            break;
+          default:
+        }
+      }, bossAppearTime * core.fps);
+      //}
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
         //ボス登場シーン終了後, プレイヤーは移動可能
         if (boss.age > bossAppearTime) {
           player.move(player.x, player.y);
-          //ステージのBGMを流す(ゲームオーバー&ゲームクリア以外)
-          if (gameoverFlag == false && gameClearFlag == false) {
-            switch (stageNumber) {
-              case 1:
-                if (boss.age - bossAppearTime < 22 * core.fps) {
-                  sound.stage1PreBgm(0);
-                } else if (boss.age - bossAppearTime > 22.8 * core.fps){
-                  sound.stage1LoopBgm(0);
-                }
-                break;
-              case 2:
-              if (boss.age - bossAppearTime < 20 * core.fps) {
-                sound.stage2PreBgm(0);
-              } else if (boss.age - bossAppearTime > 20.1 * core.fps){
-                sound.stage2LoopBgm(0);
-              }
-                break;
-              case 3:
-              if (boss.age - bossAppearTime < 49 * core.fps) {
-                sound.stage3PreBgm(0);
-              } else if (boss.age - bossAppearTime > 50 * core.fps){
-                sound.stage3LoopBgm(0);
-              }
-                break;
-              default:
-            }
-          }
         }
         //ボタンを押したら自弾発射(ボス登場シーン終了後 ＆ プレイヤーのライフあり & プレイヤー無敵時間以外 & 連射感覚守る)
         if (core.input.a && boss.age > bossAppearTime && player.life > 0 && player.barrier == false && flag == true) {
@@ -665,25 +664,12 @@ window.onload = function() {
 
       //プレイヤーのライフが0になったらゲームオーバーシーンに移動
         if (player.life == 0 && gameoverFlag == false) {
+          gameoverFlag = true;    //ゲームオーバーフラッグを立てることで敵弾発射回避
           boss.tl.clear();        //ボスの動きストップ
-          //BGM再生ストップ
-          switch (stageNumber) {
-            case 1:
-              sound.stage1PreBgm(2);
-              sound.stage1LoopBgm(2);
-              break;
-            case 2:
-              sound.stage2PreBgm(2);
-              sound.stage2LoopBgm(2);
-              break;
-            case 3:
-              sound.stage3PreBgm(2);
-              sound.stage3LoopBgm(2);
-              break;
-          }
           //プレイヤー爆発音
           sound.playerDeadSe();
-          gameoverFlag = true;    //ゲームオーバーフラッグを立てることで敵弾発射回避
+          //BGM再生ストップ
+          stageBgm.stop();
           //3秒後にゲームオーバーシーンに移動して文字とボタンを表示
           setTimeout(function(){
             core.replaceScene(createGameOverScene(boss, stageLabel, stageNumber));
@@ -694,23 +680,10 @@ window.onload = function() {
         if (boss.life == 0 && gameClearFlag == false && player.life > 0) {
           sound.bossDeadSe();
           boss.delete(scene);     //ボス消滅
-          //BGM再生ストップ
-          switch (stageNumber) {
-            case 1:
-              sound.stage1PreBgm(2);
-              sound.stage1LoopBgm(2);
-              break;
-            case 2:
-              sound.stage2PreBgm(2);
-              sound.stage2LoopBgm(2);
-              break;
-            case 3:
-              sound.stage3PreBgm(2);
-              sound.stage3LoopBgm(2);
-              break;
-          }
           gameClearFlag = true;
           player.playFlag = false;
+          //BGM再生ストップ
+          stageBgm.stop();
           //自機のアニメーション
           player.tl.delay(60).moveTo((core.width - player.width)/2, (core.height - player.height)/2 + 100, 90, enchant.Easing.BACK_EASEOUT);
           player.tl.then(function(){
@@ -723,27 +696,17 @@ window.onload = function() {
           });
         }
       });
-      //ポーズ画面に移行する（Pキーを押したら）
-      scene.addEventListener('bbuttondown', function(){
-        //BGMが流れていたら一時停止
-        if (boss.age -bossAppearTime > 0) {
-          switch (stageNumber) {
-            case 1:
-              sound.stage1PreBgm(1);
-              sound.stage1LoopBgm(1);
-              break;
-            case 2:
-              sound.stage2PreBgm(1);
-              sound.stage2LoopBgm(false);
-              break;
-            case 3:
-              sound.stage3PreBgm(1);
-              sound.stage3LoopBgm(1);
-              break;
+      //ポーズ画面に移行する（Pキーを押したら ただしクリア時とゲームオーバー時はできない）
+      setTimeout(function(){
+        scene.addEventListener('bbuttondown', function(){
+          if (gameClearFlag == false && gameoverFlag == false && player.life > 0 && boss.life > 0) {
+            //BGMが流れていたら一時停止
+            stageBgm.pause();
+            createGamePauseScene(stageBgm);
           }
-        }
-        createGamePauseScene();
-      });
+        });
+      }, bossAppearTime*core.fps);
+
       //ボス登場後、ボスの動き方を（boss.move内に書かれたボスのtimeline）に順に読み込む
       setTimeout(function(){
         bossPattern.forEach(function(value){
@@ -755,7 +718,7 @@ window.onload = function() {
     };
 
     //ポーズ画面
-    var createGamePauseScene = function(){
+    var createGamePauseScene = function(stageBgm){
       var scene = new Scene();
       scene.backgroundColor = "rgba( 0, 0, 0, 0.6 )"; //半透明の画面をゲームシーンの上に重ねる
       //ポーズの文字を表示
@@ -785,6 +748,7 @@ window.onload = function() {
       //ポーズ画面解除
       scene.addEventListener('bbuttondown', function(){
           core.popScene();      //ポーズ画面を取り去る
+          stageBgm.play();
       } );
       core.pushScene( scene );  //ここでpushしてSceneを重ねる
     };
