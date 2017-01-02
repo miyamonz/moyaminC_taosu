@@ -90,7 +90,9 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
-        stageBgm.volume = 0.07 + core.masterBgm;
+        setTimeout(function () {
+          stageBgm.volume = 0.07 + core.masterBgm;
+        },10)
       },
       stage1LoopBgm: function(on) {
         var stageBgm = core.assets[STAGE1_LOOP_BGM];
