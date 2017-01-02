@@ -62,28 +62,27 @@ window.onload = function() {
       // プレイヤーがダメージを受けた時のSE
       playerDamageSe: function() {
         var playerDamageSe = core.assets[PLAYER_DAMAGE_SE];
-        playerDamageSe.volume = 0.12 + core.masterSe;
         playerDamageSe.play();
+        playerDamageSe.volume = 0.12 + core.masterSe;
       },
       playerDeadSe: function() {
         var playerDeadBgm = core.assets[PLAYER_DEAD_SE];
-        playerDeadBgm.volume = 0.8 + core.masterSe;
         playerDeadBgm.play();
+        playerDeadBgm.volume = 0.8 + core.masterSe;
       },
       //ボスがダメージを受けた時のSE
       bossDamageSe: function() {
         var bossDamageSe = core.assets[BOSS_DAMAGE_SE];
-        bossDamageSe.volume = 0.04 + core.masterSe;   //ヒット音のボリューム
         bossDamageSe.play();                          //ヒット音
+        bossDamageSe.volume = 0.04 + core.masterSe;   //ヒット音のボリューム
       },
       bossDeadSe: function() {
         var bossDeadBgm = core.assets[BOSS_DEAD_SE];
-        bossDeadBgm.volume = 0.04 + core.masterSe;
         bossDeadBgm.play();     //ボス消滅BGM再生
+        bossDeadBgm.volume = 0.04 + core.masterSe;
       },
       stage1PreBgm: function(on) {
         var stageBgm = core.assets[STAGE1_PRE_BGM];
-        stageBgm.volume = 0.07 + core.masterBgm;
         if (on == 0) {
           stageBgm.play();
         } else if (on == 1) {
@@ -91,10 +90,10 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
+        stageBgm.volume = 0.07 + core.masterBgm;
       },
       stage1LoopBgm: function(on) {
         var stageBgm = core.assets[STAGE1_LOOP_BGM];
-        stageBgm.volume = 0.07 + core.masterBgm;
         if (on == 0) {
           stageBgm.play();
         } else if (on == 1) {
@@ -102,10 +101,10 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
+        stageBgm.volume = 0.07 + core.masterBgm;
       },
       stage2PreBgm: function(on) {
         var stageBgm = core.assets[STAGE2_PRE_BGM];
-        stageBgm.volume = 0.13 + core.masterBgm;
         if (on == 0) {
           stageBgm.play();
         } else if (on == 1) {
@@ -113,10 +112,10 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
+        stageBgm.volume = 0.13 + core.masterBgm;
       },
       stage2LoopBgm: function(on) {
         var stageBgm = core.assets[STAGE2_LOOP_BGM];
-        stageBgm.volume = 0.13 + core.masterBgm;
         if (on == 0) {
           stageBgm.play();
         } else if (on == 1) {
@@ -124,10 +123,10 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
+        stageBgm.volume = 0.13 + core.masterBgm;
       },
       stage3PreBgm: function(on) {
         var stageBgm = core.assets[STAGE3_PRE_BGM];
-        stageBgm.volume = 0.13 + core.masterBgm;
         if (on == 0) {
           stageBgm.play();
         } else if (on == 1) {
@@ -135,10 +134,10 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
+        stageBgm.volume = 0.13 + core.masterBgm;
       },
       stage3LoopBgm: function(on) {
         var stageBgm = core.assets[STAGE3_LOOP_BGM];
-        stageBgm.volume = 0.13 + core.masterBgm;
         if (on == 0) {
           stageBgm.play();
         } else if (on == 1) {
@@ -146,6 +145,7 @@ window.onload = function() {
         } else if (on == 2) {
           stageBgm.stop();
         }
+        stageBgm.volume = 0.13 + core.masterBgm;
       }
     };
 
