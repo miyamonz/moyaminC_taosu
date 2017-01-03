@@ -184,7 +184,7 @@ window.onload = function() {
         }
       }
     };
-
+    sound.initialize();
     //プレイヤーを作成するクラス
     var Player = Class.create(Sprite, {
         initialize: function(scene){
@@ -593,7 +593,6 @@ window.onload = function() {
       var ranTama2 = 0;
       var pauseFlag = false;
       //ボスが動き出してからBGM再生
-      sound.initialize();
       setTimeout(function(){
         switch (stageNumber) {
           case 1:
