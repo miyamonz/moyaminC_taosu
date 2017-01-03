@@ -117,9 +117,9 @@ window.onload = function() {
         if (play == 1) {
           se.play();     //Se再生
         } else if (play == 2) {
-          return 0.04;
+          return 0.03;
         }
-        return se; //0.04
+        return se; //0.03
       },
       bossDeadSe: function(play) {  //1で再生 2で音量初期化
         var se = core.assets[BOSS_DEAD_SE];
@@ -162,7 +162,6 @@ window.onload = function() {
         switch (change) {
           case 0:
             if (nowVolume == 1) {
-              console.log(nowVolume,initVolume);
               //変更なしバージョン
               nowVolume = initVolume;
             }else {
@@ -221,7 +220,6 @@ window.onload = function() {
           this.barrier = true;    //無敵発動
           this.life -= 1;         //ライフ１削る
           core.playerDamgeNum++;  //被ダメージ合計回数を1増やす
-          console.log("core.playerDamgeNum:"+core.playerDamgeNum);
           player.opacity = 0.5;   //半透明になる
           //無敵時間（3秒）
           setTimeout(function(){
@@ -565,14 +563,6 @@ window.onload = function() {
         bossPattern[i+3] = 1;
         bossPattern[i+4] = 2;
       }
-      //ステージのBGMと各ステージのボスの体力を設定
-      if (stageNumber == 1) {
-        var stageBgm = core.assets[STAGE1_BGM];
-      } else if (stageNumber == 2) {
-        var stageBgm = core.assets[STAGE2_BGM];
-      } else if (stageNumber == 3) {
-        var stageBgm = core.assets[STAGE3_BGM];
-      }
       //プレイヤーのライフ表示
       player.lifeLabel(scene);
       //ボスのライフ表示
@@ -597,18 +587,18 @@ window.onload = function() {
         switch (stageNumber) {
           case 1:
             sound.stage1Bgm(1); //BGM再生
-            sound.stage1Bgm(0).volume = sound.volumeChange(0, sound.stage1Bgm(0).volume, sound.stage1Bgm(2)); //音量初期化
             break;
           case 2:
             sound.stage2Bgm(1); //BGM再生
-            sound.stage2Bgm(0).volume = sound.volumeChange(0, sound.stage2Bgm(0).volume, sound.stage2Bgm(2)); //音量初期化
             break;
           case 3:
             sound.stage3Bgm(1); //BGM再生
-            sound.stage3Bgm(0).volume = sound.volumeChange(0, sound.stage3Bgm(0).volume, sound.stage3Bgm(2)); //音量初期化
             break;
           default:
         }
+        sound.stage1Bgm(0).volume = sound.volumeChange(0, sound.stage1Bgm(0).volume, sound.stage1Bgm(2)); //音量初期化
+        sound.stage2Bgm(0).volume = sound.volumeChange(0, sound.stage2Bgm(0).volume, sound.stage2Bgm(2)); //音量初期化
+        sound.stage3Bgm(0).volume = sound.volumeChange(0, sound.stage3Bgm(0).volume, sound.stage3Bgm(2)); //音量初期化
         sound.playerDamageSe(0).volume = sound.volumeChange(0, sound.playerDamageSe(0).volume, sound.playerDamageSe(2));  //音量初期化
         sound.playerDeadSe(0).volume = sound.volumeChange(0, sound.playerDeadSe(0).volume, sound.playerDeadSe(2));  //音量初期化
         sound.bossDamageSe(0).volume = sound.volumeChange(0, sound.bossDamageSe(0).volume, sound.bossDamageSe(2));  //音量初期化
@@ -710,11 +700,20 @@ window.onload = function() {
           gameoverFlag = true;    //ゲームオーバーフラッグを立てることで敵弾発射回避
           boss.tl.clear();        //ボスの動きストップ
           core.gameoverNum++;     //ゲームオーバーの合計回数を1増やす
-          console.log("core.gameoverNum:"+core.gameoverNum);
           //プレイヤー爆発音
           sound.playerDeadSe(1);
           //BGM再生ストップ
-          stageBgm.stop();
+          switch (stageNumber) {
+            case 1:
+              sound.stage1Bgm(0).stop();
+              break;
+            case 2:
+              sound.stage2Bgm(0).stop();
+              break;
+            case 3:
+              sound.stage3Bgm(0).stop();
+              break;
+          }
           //3秒後にゲームオーバーシーンに移動して文字とボタンを表示
           setTimeout(function(){
             core.replaceScene(createGameOverScene(boss, stageLabel, stageNumber));
@@ -728,7 +727,17 @@ window.onload = function() {
           gameClearFlag = true;
           player.playFlag = false;
           //BGM再生ストップ
-          stageBgm.stop();
+          switch (stageNumber) {
+            case 1:
+              sound.stage1Bgm(0).stop();
+              break;
+            case 2:
+              sound.stage2Bgm(0).stop();
+              break;
+            case 3:
+              sound.stage3Bgm(0).stop();
+              break;
+          }
           //自機のアニメーション
           player.tl.delay(60).moveTo((core.width - player.width)/2, (core.height - player.height)/2 + 100, 90, enchant.Easing.BACK_EASEOUT);
           player.tl.then(function(){
@@ -746,8 +755,18 @@ window.onload = function() {
         scene.addEventListener('bbuttondown', function(){
           if (gameClearFlag == false && gameoverFlag == false && player.life > 0 && boss.life > 0) {
             //BGM一時停止
-            stageBgm.pause();
-            createGamePauseScene(stageBgm);
+            switch (stageNumber) {
+              case 1:
+                sound.stage1Bgm(0).pause();
+                break;
+              case 2:
+                sound.stage2Bgm(0).pause();
+                break;
+              case 3:
+                sound.stage3Bgm(0).pause();
+                break;
+            }
+            createGamePauseScene(stageNumber);
           }
         });
       }, bossAppearTime*core.fps);
@@ -763,7 +782,7 @@ window.onload = function() {
     };
 
     //ポーズ画面
-    var createGamePauseScene = function(stageBgm){
+    var createGamePauseScene = function(stageNumber){
       var scene = new Scene();
       scene.backgroundColor = "rgba( 0, 0, 0, 0.6 )"; //半透明の画面をゲームシーンの上に重ねる
       //ポーズの文字を表示
@@ -788,12 +807,22 @@ window.onload = function() {
       button.ontouchstart = function(){
         core.replaceScene(createGameStartScene());  //タイトル画面に戻る
       }
-
       volumeScene(scene);            //BGM&SE音量調節を表示
       //ポーズ画面解除
       scene.addEventListener('bbuttondown', function(){
           core.popScene();      //ポーズ画面を取り去る
-          stageBgm.play();
+          //BGM再生
+          switch (stageNumber) {
+            case 1:
+              sound.stage1Bgm(0).play();
+              break;
+            case 2:
+              sound.stage2Bgm(0).play();
+              break;
+            case 3:
+              sound.stage3Bgm(0).play();
+              break;
+          }
       } );
       core.pushScene( scene );  //ここでpushしてSceneを重ねる
     };
