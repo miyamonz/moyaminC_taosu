@@ -361,11 +361,11 @@ window.onload = function() {
           this.ransha = false;    //パターン２において乱射しているときかどうか
           this.ranshaTime = 120;
           switch (stageNumber) {
-            case 1: this.life = 2; //ステージ1のボスの体力 60
+            case 1: this.life = 60; //ステージ1のボスの体力 60
               break;
-            case 2: this.life = 2; //ステージ2のボスの体力 70
+            case 2: this.life = 70; //ステージ2のボスの体力 70
               break;
-            case 3: this.life = 2;  //ステージ3のボスの体力 90
+            case 3: this.life = 90;  //ステージ3のボスの体力 90
               break;
             default:
           }
@@ -1103,7 +1103,7 @@ window.onload = function() {
       howToPlay.font = '18px "Arial"';
       scene.addChild(howToPlay);
       //バージョン表示
-      var verLabel = new Label("Ver. 1.3")  //更新したら書き換える！！
+      var verLabel = new Label("Ver. 1.3.1")  //更新したら書き換える！！
       verLabel.x = 10;
       verLabel.y = 10;
       verLabel.color = 'white';
