@@ -58,8 +58,42 @@ window.onload = function() {
   core.onload = function() {
     //BGMおよびSEを流すクラス
     var sound = {
+      initialize: function(){
+        this.playerDamageSe(1);
+        this.playerDamageSe(0).volume = this.playerDamageSe(2);
+        this.reset(this.playerDamageSe(0));
+
+        this.playerDeadSe(1);
+        this.playerDeadSe(0).volume = this.playerDeadSe(2);
+        this.reset(this.playerDeadSe(0));
+
+        this.bossDamageSe(1);
+        this.bossDamageSe(0).volume = this.bossDamageSe(2);
+        this.reset(this.bossDamageSe(0));
+
+        this.bossDeadSe(1);
+        this.bossDeadSe(0).volume = this.bossDeadSe(2);
+        this.reset(this.bossDeadSe(0));
+
+        this.stage1Bgm(1);
+        this.stage1Bgm(0).volume = this.stage1Bgm(2);
+        this.reset(this.stage1Bgm(0));
+
+        this.stage2Bgm(1);
+        this.stage2Bgm(0).volume = this.stage2Bgm(2);
+        this.reset(this.stage2Bgm(0));
+
+        this.stage3Bgm(1);
+        this.stage3Bgm(0).volume = this.stage3Bgm(2);
+        this.reset(this.stage3Bgm(0));
+
+      },
+      reset: function (TARGET) {
+        TARGET.pause();
+        TARGET.currentTime = 0;
+      },
       // プレイヤーがダメージを受けた時のSE
-      playerDamageSe: function(play) { //1で再生 2で音量初期化
+      playerDamageSe: function(play) {  //0でそのものを返す 1で再生 2で音量初期化
         var se = core.assets[PLAYER_DAMAGE_SE];
         if (play == 1) {
           se.play();     //Se再生
@@ -68,7 +102,7 @@ window.onload = function() {
         }
         return se;
       },
-      playerDeadSe: function(play) {
+      playerDeadSe: function(play) {  //1で再生 2で音量初期化
         var se = core.assets[PLAYER_DEAD_SE];
         if (play == 1) {
           se.play();     //Se再生
@@ -78,7 +112,7 @@ window.onload = function() {
         return se; //0.8
       },
       //ボスがダメージを受けた時のSE
-      bossDamageSe: function(play) {
+      bossDamageSe: function(play) {  //1で再生 2で音量初期化
         var se = core.assets[BOSS_DAMAGE_SE];
         if (play == 1) {
           se.play();     //Se再生
@@ -87,7 +121,7 @@ window.onload = function() {
         }
         return se; //0.04
       },
-      bossDeadSe: function(play) {
+      bossDeadSe: function(play) {  //1で再生 2で音量初期化
         var se = core.assets[BOSS_DEAD_SE];
         if (play == 1) {
           se.play();     //Se再生
@@ -96,7 +130,7 @@ window.onload = function() {
         }
         return se; //0.04
       },
-      stage1Bgm: function(play) {
+      stage1Bgm: function(play) { //1で再生 2で音量初期化
         var stageBgm = core.assets[STAGE1_BGM];
         if (play == 1) {
           stageBgm.play();
@@ -105,7 +139,7 @@ window.onload = function() {
         }
         return stageBgm;
       },
-      stage2Bgm: function(play) {
+      stage2Bgm: function(play) { //1で再生 2で音量初期化
         var stageBgm = core.assets[STAGE2_BGM];
         if (play == 1) {
           stageBgm.play();
@@ -114,7 +148,7 @@ window.onload = function() {
         }
         return stageBgm;
       },
-      stage3Bgm: function(play) {
+      stage3Bgm: function(play) { //1で再生 2で音量初期化
         var stageBgm = core.assets[STAGE3_BGM];
         if (play == 1) {
           stageBgm.play();
@@ -123,7 +157,7 @@ window.onload = function() {
         }
         return stageBgm;
       },
-      volumeChange: function(change, nowVolume, initVolume){
+      volumeChange: function(change, nowVolume, initVolume){  //change: 0が初期化 １で音量アップ ２で音量ダウン
         var tmpVolume = nowVolume;
         switch (change) {
           case 0:
@@ -559,26 +593,27 @@ window.onload = function() {
       var ranTama2 = 0;
       var pauseFlag = false;
       //ボスが動き出してからBGM再生
+      sound.initialize();
       setTimeout(function(){
         switch (stageNumber) {
           case 1:
-            sound.stage1Bgm(1);
+            sound.stage1Bgm(1); //BGM再生
+            sound.stage1Bgm(0).volume = sound.volumeChange(0, sound.stage1Bgm(0).volume, sound.stage1Bgm(2)); //音量初期化
             break;
           case 2:
-            sound.stage2Bgm(1);
+            sound.stage2Bgm(1); //BGM再生
+            sound.stage2Bgm(0).volume = sound.volumeChange(0, sound.stage2Bgm(0).volume, sound.stage2Bgm(2)); //音量初期化
             break;
           case 3:
-            sound.stage3Bgm(1);
+            sound.stage3Bgm(1); //BGM再生
+            sound.stage3Bgm(0).volume = sound.volumeChange(0, sound.stage3Bgm(0).volume, sound.stage3Bgm(2)); //音量初期化
             break;
           default:
         }
-        sound.stage1Bgm(0).volume = sound.volumeChange(0, sound.stage1Bgm(0).volume, sound.stage1Bgm(2));
-        sound.stage2Bgm(0).volume = sound.volumeChange(0, sound.stage2Bgm(0).volume, sound.stage2Bgm(2));
-        sound.stage3Bgm(0).volume = sound.volumeChange(0, sound.stage3Bgm(0).volume, sound.stage3Bgm(2));
-        sound.playerDamageSe(0).volume = sound.volumeChange(0, sound.playerDamageSe(0).volume, sound.playerDamageSe(2));
-        sound.playerDeadSe(0).volume = sound.volumeChange(0, sound.playerDeadSe(0).volume, sound.playerDeadSe(2));
-        sound.bossDamageSe(0).volume = sound.volumeChange(0, sound.bossDamageSe(0).volume, sound.bossDamageSe(2));
-        sound.bossDeadSe(0).volume = sound.volumeChange(0, sound.bossDeadSe(0).volume, sound.bossDeadSe(2));
+        sound.playerDamageSe(0).volume = sound.volumeChange(0, sound.playerDamageSe(0).volume, sound.playerDamageSe(2));  //音量初期化
+        sound.playerDeadSe(0).volume = sound.volumeChange(0, sound.playerDeadSe(0).volume, sound.playerDeadSe(2));  //音量初期化
+        sound.bossDamageSe(0).volume = sound.volumeChange(0, sound.bossDamageSe(0).volume, sound.bossDamageSe(2));  //音量初期化
+        sound.bossDeadSe(0).volume = sound.volumeChange(0, sound.bossDeadSe(0).volume, sound.bossDeadSe(2));  //音量初期化
       }, bossAppearTime * core.fps);
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
