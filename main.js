@@ -361,11 +361,11 @@ window.onload = function() {
           this.ransha = false;    //パターン２において乱射しているときかどうか
           this.ranshaTime = 120;
           switch (stageNumber) {
-            case 1: this.life = 60; //ステージ1のボスの体力 60
+            case 1: this.life = 2; //ステージ1のボスの体力 60
               break;
-            case 2: this.life = 70; //ステージ2のボスの体力 70
+            case 2: this.life = 2; //ステージ2のボスの体力 70
               break;
-            case 3: this.life = 90;  //ステージ3のボスの体力 90
+            case 3: this.life = 2;  //ステージ3のボスの体力 90
               break;
             default:
           }
@@ -805,6 +805,20 @@ window.onload = function() {
       scene.addChild(button);
       //タイトル画面に戻るボタンを押した時のアクション
       button.ontouchstart = function(){
+        core.gameoverNum = 0;     //ゲームオーバー合計回数をリセット
+        core.playerDamgeNum = 0;  //被ダメージ合計回数をリセット
+        //BGM停止
+        switch (stageNumber) {
+          case 1:
+            sound.stage1Bgm(0).stop();
+            break;
+          case 2:
+            sound.stage2Bgm(0).stop();
+            break;
+          case 3:
+            sound.stage3Bgm(0).stop();
+            break;
+        }
         core.replaceScene(createGameStartScene());  //タイトル画面に戻る
       }
       volumeScene(scene);            //BGM&SE音量調節を表示
@@ -1029,7 +1043,7 @@ window.onload = function() {
         var e = new Entity();
         e._element = document.createElement('div');
         e.width = 320;
-        e._element.innerHTML = "<p><a href=\"https://twitter.com/intent/tweet?hashtags=moyaminC_taoshita&text=「RANK: "+rankPlayer.text+"」でmoyaminCを倒しました！&url=https://jugjug7531.github.io/moyaminC_taosu/\" target=\"_blank\">Tweet</a></p>"
+        e._element.innerHTML = "<p><a id=\"tweet\" href=\"https://twitter.com/intent/tweet?hashtags=moyaminC_taoshita&text=「RANK: "+rankPlayer.text+"」でmoyaminCを倒しました！&url=https://jugjug7531.github.io/moyaminC_taosu/\" target=\"_blank\">Tweet</a></p>"
         e.moveTo(400.440);
         e.color = 'white';
         //時間差で降参moyamiC達とボタンとプレイヤーランクを表示
@@ -1221,8 +1235,8 @@ window.onload = function() {
     function rand(n) {
       return Math.floor(Math.random() * (n+1));
     }
-     core.replaceScene(createGameStartScene());
-     //core.replaceScene(createGameScene(3));
+    // core.replaceScene(createGameStartScene());
+     core.replaceScene(createGameScene(3));
   }
   core.start();
 };
