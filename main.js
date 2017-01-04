@@ -379,8 +379,8 @@ window.onload = function() {
             case 2: this.life = 70; //ステージ2のボスの体力 70
               break;
             case 3:
-              this.life = 9 - core.gameoverNum * 3;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに3ずつ減る（以前のステージでのゲームオーバーも含む）
-              if (this.life < 6) {
+              this.life = 90 - core.gameoverNum * 3;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに3ずつ減る（以前のステージでのゲームオーバーも含む）
+              if (this.life < 60) {
                 this.life = 60;       //下限は60
               }
               break;
