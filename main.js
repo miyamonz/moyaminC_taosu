@@ -1,4 +1,5 @@
 enchant();
+var VERSION = '1.3.2';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -156,6 +157,18 @@ window.onload = function() {
           return 0.13;  //音量初期値
         }
         return stageBgm;
+      },
+      bgmLength : function(num) { //BGMの長さ(5の倍数で切り上げ)
+        switch (num) {
+          case 1: return 100; //100
+            break;
+          case 2: return 105; //105
+            break;
+          case 3: return 150; //150
+            break;
+          default:
+
+        }
       },
       volumeChange: function(change, nowVolume, initVolume){  //change: 0が初期化 １で音量アップ ２で音量ダウン
         var tmpVolume = nowVolume;
@@ -365,7 +378,11 @@ window.onload = function() {
               break;
             case 2: this.life = 70; //ステージ2のボスの体力 70
               break;
-            case 3: this.life = 90;  //ステージ3のボスの体力 90
+            case 3:
+              this.life = 90 - core.gameoverNum * 3;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに3ずつ減る（以前のステージでのゲームオーバーも含む）
+              if (this.life < 60) {
+                this.life = 60;       //下限は60
+              }
               break;
             default:
           }
@@ -584,6 +601,7 @@ window.onload = function() {
       var pauseFlag = false;
       //ボスが動き出してからBGM再生
       setTimeout(function(){
+        //ステージのBGM再生
         switch (stageNumber) {
           case 1:
             sound.stage1Bgm(1); //BGM再生
@@ -596,6 +614,7 @@ window.onload = function() {
             break;
           default:
         }
+        //すべての音源の音量を初期化
         sound.stage1Bgm(0).volume = sound.volumeChange(0, sound.stage1Bgm(0).volume, sound.stage1Bgm(2)); //音量初期化
         sound.stage2Bgm(0).volume = sound.volumeChange(0, sound.stage2Bgm(0).volume, sound.stage2Bgm(2)); //音量初期化
         sound.stage3Bgm(0).volume = sound.volumeChange(0, sound.stage3Bgm(0).volume, sound.stage3Bgm(2)); //音量初期化
@@ -604,8 +623,31 @@ window.onload = function() {
         sound.bossDamageSe(0).volume = sound.volumeChange(0, sound.bossDamageSe(0).volume, sound.bossDamageSe(2));  //音量初期化
         sound.bossDeadSe(0).volume = sound.volumeChange(0, sound.bossDeadSe(0).volume, sound.bossDeadSe(2));  //音量初期化
       }, bossAppearTime * core.fps);
+      //制限時間を表示
+      var timeLabel = new Label("");
+      timeLabel.moveTo(800, 45);
+      timeLabel.color = 'white';
+      timeLabel.font = '24px "Arial"';
+      timeLabel.pause = false;
+      scene.addChild(timeLabel);
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
+        if (boss.age - bossAppearTime == 1) {
+          //制限時間を減らす（タイムラベルのイベントリスナー）
+          var time = 0;
+          timeLabel.addEventListener('enterframe', function() {
+            time += 1 / core.fps; //１フレームあたりで進む秒数
+            //時間が減る条件（制限時間内かつゲームクリアしてないかつゲームオーバーしてないかつポーズ画面中でない）
+            if (sound.bgmLength(stageNumber) - time > 0 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false) {
+              timeLabel.text = "Time:" + (sound.bgmLength(stageNumber) - time).toFixed(2);  //BGM全体の長さから引く(BGMが終わったら時間切れ)
+            }
+            //残り時間30秒を切ったら赤色に変える
+            if (sound.bgmLength(stageNumber) - time < 30){
+              timeLabel.color = 'orangered';
+              timeLabel.tl.scaleTo(1.5, 10);
+            }
+          })
+        }
         //ボス登場シーン終了後, プレイヤーは移動可能
         if (boss.age > bossAppearTime) {
           player.move(player.x, player.y);
@@ -716,7 +758,7 @@ window.onload = function() {
           }
           //3秒後にゲームオーバーシーンに移動して文字とボタンを表示
           setTimeout(function(){
-            core.replaceScene(createGameOverScene(boss, stageLabel, stageNumber));
+            core.replaceScene(createGameOverScene(boss, stageLabel, stageNumber, timeLabel));
           }, 3000);
         }
 
@@ -743,9 +785,9 @@ window.onload = function() {
           player.tl.then(function(){
             //if文で全ステージクリアかどうか判断する（最終ステージ＝３）
             if (stageNumber == 3) {
-              core.replaceScene(createGameAllClearScene(player, stageLabel, stageNumber));
+              core.replaceScene(createGameAllClearScene(player, stageLabel, stageNumber, timeLabel));
             } else {
-              core.replaceScene(createGameClearScene(player, stageLabel, stageNumber));
+              core.replaceScene(createGameClearScene(player, stageLabel, stageNumber, timeLabel));
             }
           });
         }
@@ -766,7 +808,8 @@ window.onload = function() {
                 sound.stage3Bgm(0).pause();
                 break;
             }
-            createGamePauseScene(stageNumber);
+            timeLabel.pause = true;
+            createGamePauseScene(stageNumber, timeLabel);
           }
         });
       }, bossAppearTime*core.fps);
@@ -782,7 +825,7 @@ window.onload = function() {
     };
 
     //ポーズ画面
-    var createGamePauseScene = function(stageNumber){
+    var createGamePauseScene = function(stageNumber, timeLabel){
       var scene = new Scene();
       scene.backgroundColor = "rgba( 0, 0, 0, 0.6 )"; //半透明の画面をゲームシーンの上に重ねる
       //ポーズの文字を表示
@@ -837,18 +880,21 @@ window.onload = function() {
               sound.stage3Bgm(0).play();
               break;
           }
+          //制限時間が減るの開始
+          timeLabel.pause = false;
       } );
       core.pushScene( scene );  //ここでpushしてSceneを重ねる
     };
 
     //ゲームオーバー画面
-    var createGameOverScene = function(boss, stageLabel, stageNumber){
+    var createGameOverScene = function(boss, stageLabel, stageNumber, timeLabel){
       var scene = new Scene();
       var backGround = new Sprite(960, 540);
       backGround.image = core.assets[BACKGROUND_IMG];
       scene.addChild(backGround);
       scene.addChild(stageLabel);
       scene.addChild(boss);
+      scene.addChild(timeLabel);
       boss.lifeLabel(scene);
       //ゲームオーバーの文字
       var gameover = new Sprite(189, 97);
@@ -860,7 +906,7 @@ window.onload = function() {
       //タイトル画面に戻るボタン
       var button = new Button("Back to Title", "dark");
       button.x = 100;
-      button.y = 400;
+      button.y = 450;
       scene.addChild(button);
       //再挑戦するボタン
       var retryButton = new Button("Retry", "dark");
@@ -882,13 +928,14 @@ window.onload = function() {
     }
 
     //ゲームクリア画面
-    var createGameClearScene = function(player, stageLabel, stageNumber){
+    var createGameClearScene = function(player, stageLabel, stageNumber, timeLabel){
         var scene = new Scene();
         var backGround = new Sprite(960, 540);
         backGround.image = core.assets[BACKGROUND_IMG];
         scene.addChild(backGround);
         scene.addChild(player);
         scene.addChild(stageLabel);
+        scene.addChild(timeLabel);
         for (var i = 0; i < player.life; i++) {
           scene.addChild(player.myLifeLabel[i]);
         }
@@ -905,7 +952,7 @@ window.onload = function() {
         //タイトル画面に戻るボタン
         var button = new Button("Back to Title!", "dark");
         button.x = 100;
-        button.y = 400;
+        button.y = 450;
         //次のステージに進むボタン
         var nextButton = new Button("Next Stage!", "light");
         nextButton.x = scene.width / 2 - 100;
@@ -930,13 +977,14 @@ window.onload = function() {
     }
 
     //ゲーム全ステージクリア画面
-    var createGameAllClearScene = function(player, stageLabel, stageNumber){
+    var createGameAllClearScene = function(player, stageLabel, stageNumber, timeLabel){
         var scene = new Scene();
         var backGround = new Sprite(960, 540);
         backGround.image = core.assets[BACKGROUND_IMG];
         scene.addChild(backGround);
         scene.addChild(player);
         scene.addChild(stageLabel);
+        scene.addChild(timeLabel);
         for (var i = 0; i < player.life; i++) {
           scene.addChild(player.myLifeLabel[i]);
         }
@@ -965,7 +1013,7 @@ window.onload = function() {
           moyaminC[i] = new Sprite(80, 80);
           moyaminC[i].image = core.assets[BOSS_IMG];
           moyaminC[i].frame = i;
-          moyaminC[i].x = 350 + 120 * i;
+          moyaminC[i].x = 230 + 120 * i;
           moyaminC[i].y = 45;
         }
         //プレイヤーランクを表示
@@ -1036,9 +1084,9 @@ window.onload = function() {
         button.x = 100;
         button.y = 450;
         //再戦するボタン
-        var retryButton = new Button("Fight again!", "dark");
-        retryButton.x = 100;
-        retryButton.y = 400;
+        // var retryButton = new Button("Fight again!", "dark");
+        // retryButton.x = 100;
+        // retryButton.y = 400;
         // ツイートボタン
         var e = new Entity();
         e._element = document.createElement('div');
@@ -1067,10 +1115,10 @@ window.onload = function() {
           core.playerDamgeNum = 0;  //被ダメージ合計回数をリセット
           core.replaceScene(createGameStartScene());  //タイトル画面に戻る
         }
-        //再戦するボタンを押した時のアクション
-        retryButton.ontouchstart = function(){
-          core.replaceScene(createGameScene(stageNumber));  //ラストステージを再挑戦
-        }
+        // //再戦するボタンを押した時のアクション
+        // retryButton.ontouchstart = function(){
+        //   core.replaceScene(createGameScene(stageNumber));  //ラストステージを再挑戦
+        // }
         return scene;
     }
 
@@ -1103,7 +1151,7 @@ window.onload = function() {
       howToPlay.font = '18px "Arial"';
       scene.addChild(howToPlay);
       //バージョン表示
-      var verLabel = new Label("Ver. 1.3.1")  //更新したら書き換える！！
+      var verLabel = new Label("Ver. " + VERSION)
       verLabel.x = 10;
       verLabel.y = 10;
       verLabel.color = 'white';
@@ -1120,6 +1168,10 @@ window.onload = function() {
         core.replaceScene(createGameScene(1));
       }
       return scene;
+    }
+
+    var createGameTimeAttackScene = function () {
+
     }
 
     //BGM&SE音量調節ができるシーンを表示する関数
@@ -1236,7 +1288,7 @@ window.onload = function() {
       return Math.floor(Math.random() * (n+1));
     }
      core.replaceScene(createGameStartScene());
-     //core.replaceScene(createGameScene(3));
+     //core.replaceScene(createGameScene(3)); //バグ修正用
   }
   core.start();
 };
