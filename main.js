@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '1.3.2';  //変更したらバージョンを書き換える
+var VERSION = '1.3.3';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -379,8 +379,8 @@ window.onload = function() {
             case 2: this.life = 70; //ステージ2のボスの体力 70
               break;
             case 3:
-              this.life = 90 - core.gameoverNum * 3;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに3ずつ減る（以前のステージでのゲームオーバーも含む）
-              if (this.life < 60) {
+              this.life = 9 - core.gameoverNum * 3;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに3ずつ減る（以前のステージでのゲームオーバーも含む）
+              if (this.life < 6) {
                 this.life = 60;       //下限は60
               }
               break;
@@ -1027,40 +1027,59 @@ window.onload = function() {
         rankPlayer.moveTo(rank.x+100,410);
         rankPlayer.color = 'white';
         rankPlayer.font = '48px "Arial"';
+        var rankcount = 0;
         switch (core.gameoverNum) {
           case 0:
             if (core.playerDamgeNum == 0) {
+              rankcount = 0;
               rankPlayer.color = 'gold';
               rankPlayer.text = "MASTER";
             } else if (core.playerDamgeNum < 5){
+              rankcount = 1;
               rankPlayer.color = 'hotpink';
               rankPlayer.text = "SS";
             } else {
+              rankcount = 2;
               rankPlayer.color = 'hotpink';
               rankPlayer.text = "S";
             }
             break;
           case 1:
+            rankcount = 3;
             rankPlayer.text = "A";
             break;
           case 2:
           case 3:
+            rankcount = 4;
             rankPlayer.text = "B";
             break;
           case 4:
           case 5:
+            rankcount = 5;
             rankPlayer.color = 'gray';
             rankPlayer.text = "C";
             break;
           case 6:
           case 7:
+            rankcount = 6;
             rankPlayer.color = 'gray';
             rankPlayer.text = "D";
             break;
           default:
+            rankcount = 7;
             rankPlayer.color = 'gray';
             rankPlayer.text = "E";
             break;
+        }
+        //プレイヤーランクをローカルストレージに保存
+        if (!localStorage.getItem("rankcount")) { //もしローカルストレージのrankcountがnullだったら100を保存
+          localStorage.setItem("rankcount", "100");
+        }
+        //最高プレイヤーランクを更新したかどうか判別
+        if (rankcount < JSON.parse(localStorage.getItem("rankcount"))) {
+          localStorage.setItem("rankcount", JSON.stringify(rankcount));     //ランクカウント更新
+          localStorage.setItem("rankPlayerText", rankPlayer.text);          //最高プレイヤーランクを更新
+          localStorage.setItem("rankPlayerColor", rankPlayer.color);        //文字の色も更新
         }
         //ゲームオーバー回数を表示
         var rankGameoverNum = new Label();
@@ -1107,7 +1126,7 @@ window.onload = function() {
             scene.addChild(rankGameoverNum);
             scene.addChild(rankPlayerDamageNum);
             scene.addChild(button);
-            scene.addChild(retryButton);
+          //  scene.addChild(retryButton);
         });
         //タイトル画面に戻るボタンを押した時のアクション
         button.ontouchstart = function(){
@@ -1155,17 +1174,49 @@ window.onload = function() {
       verLabel.x = 10;
       verLabel.y = 10;
       verLabel.color = 'white';
-      verLabel.font = '12px "Arial"';
+      verLabel.font = '16px "Arial"';
       scene.addChild(verLabel);
+      //「RANK：」の文字を表示
+      var rank = new Label("RANK：");
+      rank.x = 770;
+      rank.y = 15;
+      rank.color = 'white';
+      rank.font = '18px "Arial"';
+      scene.addChild(rank);
+      //プレイヤーの最高ランク表示
+      var rankLabel = new Label(localStorage.getItem("rankPlayerText"));
+      rankLabel.x = rank.x + 70;
+      rankLabel.y = 10;
+      rankLabel.color = localStorage.getItem("rankPlayerColor");
+      rankLabel.font = '24px "Arial"';
+      scene.addChild(rankLabel);
+
       //スタートボタン
       var button = new Button("Play!", "light");
       button.x = scene.width / 2 - 80;
       button.y = 350;
       button.scale(2);
       scene.addChild(button);
-
+      //ボタンを押した時のアクション
       button.ontouchstart = function(){
         core.replaceScene(createGameScene(1));
+      }
+      //リセットボタン
+      var resetbutton = new Button("Reset", "dark");
+      resetbutton.x = 10;
+      resetbutton.y = 500;
+      resetbutton.scale(1);
+      scene.addChild(resetbutton);
+      //ボタンを押した時のアクション
+      resetbutton.ontouchstart = function(){
+        var answer = confirm('リセットしますか？最高プレイヤーランクが消えます。');
+        if (answer) {
+          //このゲームに関連するローカルストレージのデータを全消去
+          localStorage.removeItem("rankcount");
+          localStorage.removeItem("rankPlayerText");
+          localStorage.removeItem("rankPlayerColor");
+          core.replaceScene(createGameStartScene());  //タイトル画面更新
+        }
       }
       return scene;
     }
@@ -1287,8 +1338,8 @@ window.onload = function() {
     function rand(n) {
       return Math.floor(Math.random() * (n+1));
     }
-     core.replaceScene(createGameStartScene());
-     //core.replaceScene(createGameScene(3)); //バグ修正用
+     //core.replaceScene(createGameStartScene());
+     core.replaceScene(createGameScene(3)); //バグ修正用
   }
   core.start();
 };
