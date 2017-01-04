@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '1.3.3';  //変更したらバージョンを書き換える
+var VERSION = '1.3.4';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -639,12 +639,12 @@ window.onload = function() {
             time += 1 / core.fps; //１フレームあたりで進む秒数
             //時間が減る条件（制限時間内かつゲームクリアしてないかつゲームオーバーしてないかつポーズ画面中でない）
             if (sound.bgmLength(stageNumber) - time > 0 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false) {
-              timeLabel.text = "Time:" + (sound.bgmLength(stageNumber) - time).toFixed(2);  //BGM全体の長さから引く(BGMが終わったら時間切れ)
-            }
-            //残り時間30秒を切ったら赤色に変える
-            if (sound.bgmLength(stageNumber) - time < 30){
-              timeLabel.color = 'orangered';
-              timeLabel.tl.scaleTo(1.5, 10);
+              timeLabel.text = "Time: " + (sound.bgmLength(stageNumber) - time).toFixed(2);  //BGM全体の長さから引く(BGMが終わったら時間切れ)
+              //残り時間30秒を切ったら赤色に変える
+              if (sound.bgmLength(stageNumber) - time < 30 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false){
+                timeLabel.color = 'orangered';
+                timeLabel.tl.scaleTo(1.5, 10);
+              }
             }
           })
         }
@@ -737,8 +737,8 @@ window.onload = function() {
           }
         }
 
-      //プレイヤーのライフが0になったらゲームオーバーシーンに移動
-        if (player.life == 0 && gameoverFlag == false) {
+      //プレイヤーのライフが0もしくは時間切れになったらゲームオーバーシーンに移動
+        if ((player.life == 0 || sound.bgmLength(stageNumber) - time <= 0) && gameoverFlag == false) {
           gameoverFlag = true;    //ゲームオーバーフラッグを立てることで敵弾発射回避
           boss.tl.clear();        //ボスの動きストップ
           core.gameoverNum++;     //ゲームオーバーの合計回数を1増やす
@@ -1184,11 +1184,19 @@ window.onload = function() {
       rank.font = '18px "Arial"';
       scene.addChild(rank);
       //プレイヤーの最高ランク表示
-      var rankLabel = new Label(localStorage.getItem("rankPlayerText"));
+      var rankLabel = new Label("");
       rankLabel.x = rank.x + 70;
       rankLabel.y = 10;
-      rankLabel.color = localStorage.getItem("rankPlayerColor");
-      rankLabel.font = '24px "Arial"';
+      if (localStorage.getItem("rankPlayerText") == null) {
+        rankLabel.y = 15;
+        rankLabel.text = 'BEGINNER';
+        rankLabel.font = '18px "Arial"';
+        rankLabel.color = 'white';
+      } else {
+        rankLabel.text = localStorage.getItem("rankPlayerText");
+        rankLabel.font = '24px "Arial"';
+        rankLabel.color = localStorage.getItem("rankPlayerColor");
+      }
       scene.addChild(rankLabel);
 
       //スタートボタン
