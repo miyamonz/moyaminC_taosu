@@ -1338,8 +1338,8 @@ window.onload = function() {
     function rand(n) {
       return Math.floor(Math.random() * (n+1));
     }
-     //core.replaceScene(createGameStartScene());
-     core.replaceScene(createGameScene(3)); //バグ修正用
+     core.replaceScene(createGameStartScene());
+     //core.replaceScene(createGameScene(3)); //バグ修正用
   }
   core.start();
 };
