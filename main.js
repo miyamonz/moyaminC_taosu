@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '1.3.5';  //変更したらバージョンを書き換える
+var VERSION = '1.3.6';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -321,8 +321,29 @@ window.onload = function() {
         },
         moveTouch: function(e) {
           var playerMaxSpeed = 7;     //プレイヤーの最高スピード
+          // var startX = e.x;
+          var startY = e.y;
           if(this.playFlag == true){  //ボス撃破（playFlag = false）なら動かない
-
+            if (core.input.left) {
+              if (x >= (this.width - obj.width)/2) {  //左方向の限界
+                x -= playerMaxSpeed;
+              }
+            }
+            if (core.input.right) {
+              if (x <= 960 - this.width + (this.width - obj.width)/2) { //右方向の限界
+                x += playerMaxSpeed;
+              }
+            }
+            if (core.input.up) {
+              if (y >= (this.height - obj.height)/2) {  //上方向の限界
+                y -= playerMaxSpeed;
+              }
+            }
+            if (core.input.down) {
+              if (y <= 540 - this.height + (this.height - obj.height)/2) {  //下方向の限界
+                y += playerMaxSpeed;
+              }
+            }
             this.x = e.x;
             this.y = e.y;
           }
@@ -652,15 +673,13 @@ window.onload = function() {
       scene.addChild(timeLabel);
       playerHitBox = player.hitbox(scene);
       var time = 0;
-      // scene.addEventListener('TOUCH_START', function(e){
+      // scene.addEventListener('touchmove', function(e){
       //   // タッチイベントは、タッチした座標をe.x , e.y として取る
       //   //ボス登場シーン終了後, プレイヤーは移動可能
       //   if (boss.age > bossAppearTime) {
       //     player.moveTouch(e);
       //   }
       // });
-      // phbX = playerHitBox.x - (player.width - playerHitBox.width)/2;
-      // phbY = playerHitBox.y - (player.height - playerHitBox.height)/2
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
         if (boss.age - bossAppearTime == 1) {
@@ -769,7 +788,6 @@ window.onload = function() {
             }
           }
         }
-console.log((time));
       //プレイヤーのライフが0もしくは時間切れになったらゲームオーバーシーンに移動
         if ((player.life == 0 || sound.bgmLength(stageNumber) - time <= 0) && gameoverFlag == false) {
           if (sound.bgmLength(stageNumber) - time <= 0) {
@@ -1071,7 +1089,7 @@ console.log((time));
               rankcount = 0;
               rankPlayer.color = 'gold';
               rankPlayer.text = "MASTER";
-            } else if (core.playerDamgeNum < 5){
+            } else if (core.playerDamgeNum < 3){
               rankcount = 1;
               rankPlayer.color = 'hotpink';
               rankPlayer.text = "SS";
