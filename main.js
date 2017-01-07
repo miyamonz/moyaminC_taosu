@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '1.3.6';  //変更したらバージョンを書き換える
+var VERSION = '2.0';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -55,6 +55,8 @@ window.onload = function() {
   //ショットのキーバインド
   core.keybind( 'X'.charCodeAt(0), 'a' );
   core.keybind( 'P'.charCodeAt(0), 'b' );
+
+  var stageClearTimeArray = new Array();
 
   core.onload = function() {
     //BGMおよびSEを流すクラス
@@ -573,8 +575,8 @@ window.onload = function() {
         }
     });
 
-    //ゲームシーン
-    var createGameScene = function(stageNumber){
+    //ゲームシーン(0:通常 1:タイムアタック)
+    var createGameScene = function(stageNumber, stageMode){
       //背景
       var scene = new Scene();
       var backGround = new Sprite(960, 540);
@@ -627,7 +629,11 @@ window.onload = function() {
       boss.lifeLabel(scene);
       //現在のステージを表示
       var stageLabel = new Label("");
-      stageLabel.text = "STAGE " + stageNumber;
+      if (stageMode == 0) {
+        stageLabel.text = "STAGE " + stageNumber;
+      } else if (stageMode == 1) {
+        stageLabel.text = "STAGE " + stageNumber + " (Speed Run)";
+      }
       stageLabel.color = 'white';
       stageLabel.x = 40;
       stageLabel.y = 45;
@@ -686,7 +692,10 @@ window.onload = function() {
           //制限時間を減らす（タイムラベルのイベントリスナー）
           // var time = 0;
           timeLabel.addEventListener('enterframe', function() {
-            time += 1 / core.fps; //１フレームあたりで進む秒数
+            //ゲームクリアするまで時間が減る
+            if(gameClearFlag == false){
+              time += 1 / core.fps; //１フレームあたりで進む秒数
+            }
             //時間が減る条件（制限時間内かつゲームクリアしてないかつゲームオーバーしてないかつポーズ画面中でない）
             if (sound.bgmLength(stageNumber) - time > 0 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false) {
               timeLabel.text = "Time: " + (sound.bgmLength(stageNumber) - time).toFixed(2);  //BGM全体の長さから引く(BGMが終わったら時間切れ)
@@ -813,7 +822,7 @@ window.onload = function() {
           }
           //3秒後にゲームオーバーシーンに移動して文字とボタンを表示
           setTimeout(function(){
-            core.replaceScene(createGameOverScene(boss, stageLabel, stageNumber, timeLabel));
+            core.replaceScene(createGameOverScene(boss, stageLabel, stageNumber, timeLabel, stageMode));
           }, 3000);
         }
 
@@ -823,6 +832,10 @@ window.onload = function() {
           boss.delete(scene);     //ボス消滅
           gameClearFlag = true;
           player.playFlag = false;
+          if (stageMode == 1) {
+            stageClearTime = time.toFixed(2);
+            stageClearTimeArray[stageNumber-1] = stageClearTime;
+          }
           //BGM再生ストップ
           switch (stageNumber) {
             case 1:
@@ -840,9 +853,9 @@ window.onload = function() {
           player.tl.then(function(){
             //if文で全ステージクリアかどうか判断する（最終ステージ＝３）
             if (stageNumber == 3) {
-              core.replaceScene(createGameAllClearScene(player, stageLabel, stageNumber, timeLabel));
+              core.replaceScene(createGameAllClearScene(player, stageLabel, stageNumber, timeLabel, stageMode));
             } else {
-              core.replaceScene(createGameClearScene(player, stageLabel, stageNumber, timeLabel));
+              core.replaceScene(createGameClearScene(player, stageLabel, stageNumber, timeLabel, stageMode));
             }
           });
         }
@@ -942,7 +955,7 @@ window.onload = function() {
     };
 
     //ゲームオーバー画面
-    var createGameOverScene = function(boss, stageLabel, stageNumber, timeLabel){
+    var createGameOverScene = function(boss, stageLabel, stageNumber, timeLabel, stageMode){
       var scene = new Scene();
       var backGround = new Sprite(960, 540);
       backGround.image = core.assets[BACKGROUND_IMG];
@@ -954,36 +967,44 @@ window.onload = function() {
       //ゲームオーバーの文字
       var gameover = new Sprite(189, 97);
       gameover.image = core.assets[GAMEOVER_IMG];
-      gameover.scale(3);
+      gameover.scale(2.8);
       gameover.x = (core.width - gameover.width) / 2 ;
-      gameover.y = 160;
+      gameover.y = 175;
       scene.addChild(gameover);
       //タイトル画面に戻るボタン
       var button = new Button("Back to Title", "dark");
       button.x = 100;
       button.y = 450;
-      scene.addChild(button);
-      //再挑戦するボタン
-      var retryButton = new Button("Retry", "dark");
-      retryButton.x = scene.width / 2 - 70;
-      retryButton.y = 400;
-      retryButton.scale(2);
-      scene.addChild(retryButton);
       //タイトル画面に戻るボタンを押した時のアクション
       button.ontouchstart = function(){
         core.gameoverNum = 0;     //ゲームオーバー合計回数をリセット
         core.playerDamgeNum = 0;  //被ダメージ合計回数をリセット
         core.replaceScene(createGameStartScene());  //タイトル画面に戻る
       }
-      //再挑戦するボタンを押した時のアクション
-      retryButton.ontouchstart = function(){
-        core.replaceScene(createGameScene(stageNumber));  //同じステージを再挑戦
+      //再挑戦するボタン
+      var retryButton = new Button("Retry", "dark");
+      retryButton.x = scene.width / 2 - 60;
+      retryButton.y = 400;
+      retryButton.scale(2);
+      //再挑戦ボタンは通常モードの時のみ表示（タイムアタックモードは一回ゲームオーバしたらタイトルに戻る）
+      if (stageMode == 0) {
+        //再挑戦するボタンを押した時のアクション
+        retryButton.ontouchstart = function(){
+          core.replaceScene(createGameScene(stageNumber, 0));  //同じステージを再挑戦
+        }
+        scene.addChild(retryButton);
+        scene.addChild(button);
+      } else if (stageMode == 1) {
+        button.x = scene.width / 2 - 100;
+        button.y = 400;
+        button.scale(2);
+        scene.addChild(button);
       }
       return scene;
     }
 
     //ゲームクリア画面
-    var createGameClearScene = function(player, stageLabel, stageNumber, timeLabel){
+    var createGameClearScene = function(player, stageLabel, stageNumber, timeLabel, stageMode){
         var scene = new Scene();
         var backGround = new Sprite(960, 540);
         backGround.image = core.assets[BACKGROUND_IMG];
@@ -1013,10 +1034,22 @@ window.onload = function() {
         nextButton.x = scene.width / 2 - 100;
         nextButton.y = 350;
         nextButton.scale(2);
-        //時間差でタイトル画面に戻るボタンを表示
+        //時間差でタイトル画面に戻る等をボタンを表示
         player.tl.delay(75).then(function(){
-            scene.addChild(button);
-            scene.addChild(nextButton);
+          if (stageMode == 1) {
+            //ステージクリアタイム（タイムアタックモードの時のみ）
+            for (var i = 0; i < stageNumber; i++) {
+              var stageClearTimeLabel = new Label("");
+              stageClearTimeLabel.moveTo(scene.width/2 +230, 340 + i * 30);
+              stageClearTimeLabel.color = 'white';
+              stageClearTimeLabel.font = '24px "Arial"';
+              stageClearTimeLabel.text = "STAGE" + (i+1) +"："+ stageClearTimeArray[i];
+              scene.addChild(stageClearTimeLabel);  //ステージクリア合計タイム
+            }
+          }
+            scene.addChild(button);       //タイトルに戻るボタンを表示
+            scene.addChild(nextButton);   //次のステージに進むボタンを表示
+
         });
         //タイトル画面に戻るボタンを押した時のアクション
         button.ontouchstart = function(){
@@ -1026,13 +1059,18 @@ window.onload = function() {
         }
         //次のステージに進むボタンを押した時のアクション
         nextButton.ontouchstart = function(){
-          core.replaceScene(createGameScene(stageNumber+1));  //次のステージに進む
+          if (stageMode == 1) {
+            core.replaceScene(createGameScene(stageNumber+1, 1));  //次のステージに進む
+          } else {
+            core.replaceScene(createGameScene(stageNumber+1, 0));  //次のステージに進む
+          }
+
         }
         return scene;
     }
 
     //ゲーム全ステージクリア画面
-    var createGameAllClearScene = function(player, stageLabel, stageNumber, timeLabel){
+    var createGameAllClearScene = function(player, stageLabel, stageNumber, timeLabel, stageMode){
         var scene = new Scene();
         var backGround = new Sprite(960, 540);
         backGround.image = core.assets[BACKGROUND_IMG];
@@ -1069,72 +1107,78 @@ window.onload = function() {
           moyaminC[i].image = core.assets[BOSS_IMG];
           moyaminC[i].frame = i;
           moyaminC[i].x = 250 + 110 * i;
-          moyaminC[i].y = 45;
+          moyaminC[i].y = 85;
         }
-        //プレイヤーランクを表示
+        //「RANK：」or「TOTAL：」の文字を表示
         var rank = new Label();
         rank.moveTo(350,430);
         rank.color = 'white';
-        rank.text = "RANK：";
+        if (stageMode == 0) {
+          rank.text = "RANK：";
+        } else if(stageMode == 1){
+          rank.text = "TOTAL：";
+        }
         rank.font = '24px "Arial"';
         //プレイヤーランクを表示
         var rankPlayer = new Label();
         rankPlayer.moveTo(rank.x+100,410);
         rankPlayer.color = 'white';
         rankPlayer.font = '48px "Arial"';
-        var rankcount = 0;
-        switch (core.gameoverNum) {
-          case 0:
-            if (core.playerDamgeNum == 0) {
-              rankcount = 0;
-              rankPlayer.color = 'gold';
-              rankPlayer.text = "MASTER";
-            } else if (core.playerDamgeNum < 3){
-              rankcount = 1;
-              rankPlayer.color = 'hotpink';
-              rankPlayer.text = "SS";
-            } else {
-              rankcount = 2;
-              rankPlayer.color = 'hotpink';
-              rankPlayer.text = "S";
-            }
-            break;
-          case 1:
-            rankcount = 3;
-            rankPlayer.text = "A";
-            break;
-          case 2:
-          case 3:
-            rankcount = 4;
-            rankPlayer.text = "B";
-            break;
-          case 4:
-          case 5:
-            rankcount = 5;
-            rankPlayer.color = 'gray';
-            rankPlayer.text = "C";
-            break;
-          case 6:
-          case 7:
-            rankcount = 6;
-            rankPlayer.color = 'gray';
-            rankPlayer.text = "D";
-            break;
-          default:
-            rankcount = 7;
-            rankPlayer.color = 'gray';
-            rankPlayer.text = "E";
-            break;
-        }
-        //プレイヤーランクをローカルストレージに保存
-        if (!localStorage.getItem("rankcount")) { //もしローカルストレージのrankcountがnullだったら100を保存
-          localStorage.setItem("rankcount", "100");
-        }
-        //最高プレイヤーランクを更新したかどうか判別
-        if (rankcount < JSON.parse(localStorage.getItem("rankcount"))) {
-          localStorage.setItem("rankcount", JSON.stringify(rankcount));     //ランクカウント更新
-          localStorage.setItem("rankPlayerText", rankPlayer.text);          //最高プレイヤーランクを更新
-          localStorage.setItem("rankPlayerColor", rankPlayer.color);        //文字の色も更新
+        if (stageMode == 0) {
+          var rankcount = 0;
+          switch (core.gameoverNum) {
+            case 0:
+              if (core.playerDamgeNum == 0) {
+                rankcount = 0;
+                rankPlayer.color = 'gold';
+                rankPlayer.text = "MASTER";
+              } else if (core.playerDamgeNum < 3){
+                rankcount = 1;
+                rankPlayer.color = 'hotpink';
+                rankPlayer.text = "SS";
+              } else {
+                rankcount = 2;
+                rankPlayer.color = 'hotpink';
+                rankPlayer.text = "S";
+              }
+              break;
+            case 1:
+              rankcount = 3;
+              rankPlayer.text = "A";
+              break;
+            case 2:
+            case 3:
+              rankcount = 4;
+              rankPlayer.text = "B";
+              break;
+            case 4:
+            case 5:
+              rankcount = 5;
+              rankPlayer.color = 'gray';
+              rankPlayer.text = "C";
+              break;
+            case 6:
+            case 7:
+              rankcount = 6;
+              rankPlayer.color = 'gray';
+              rankPlayer.text = "D";
+              break;
+            default:
+              rankcount = 7;
+              rankPlayer.color = 'gray';
+              rankPlayer.text = "E";
+              break;
+          }
+          //プレイヤーランクをローカルストレージに保存
+          if (!localStorage.getItem("rankcount")) { //もしローカルストレージのrankcountがnullだったら100を保存
+            localStorage.setItem("rankcount", "100");
+          }
+          //最高プレイヤーランクを更新したかどうか判別
+          if (rankcount < JSON.parse(localStorage.getItem("rankcount"))) {
+            localStorage.setItem("rankcount", JSON.stringify(rankcount));     //ランクカウント更新
+            localStorage.setItem("rankPlayerText", rankPlayer.text);          //最高プレイヤーランクを更新
+            localStorage.setItem("rankPlayerColor", rankPlayer.color);        //文字の色も更新
+          }
         }
         //ゲームオーバー回数を表示
         var rankGameoverNum = new Label();
@@ -1157,10 +1201,6 @@ window.onload = function() {
         var button = new Button("Back to Title!", "dark");
         button.x = 100;
         button.y = 450;
-        //再戦するボタン
-        // var retryButton = new Button("Fight again!", "dark");
-        // retryButton.x = 100;
-        // retryButton.y = 400;
         // ツイートボタン
         var e = new Entity();
         e._element = document.createElement('div');
@@ -1173,15 +1213,65 @@ window.onload = function() {
             for (var i = 0; i < 5; i++) {
               scene.addChild(moyaminC[i]);
             }
-            scene.addChild(e);
-            scene.addChild(moyamins);
-            scene.addChild(oteage);
+            if (stageMode == 0) {
+              //通常モード
+              scene.addChild(moyamins);
+              scene.addChild(oteage);
+              scene.addChild(rankPlayer);
+              scene.addChild(rankGameoverNum);
+            } else if (stageMode == 1) {
+              //タイムアタックモード　ステージクリアタイム
+              var totalTime = 0;
+              for (var i = 0; i < stageNumber; i++) {
+                //各ステージのクリアタイム
+                var stageClearTimeLabel = new Label("");
+                stageClearTimeLabel.moveTo(scene.width/2 +230, 340 + i * 30);
+                stageClearTimeLabel.color = 'white';
+                stageClearTimeLabel.font = '24px "Arial"';
+                stageClearTimeLabel.text = "STAGE" + (i+1) +"："+ stageClearTimeArray[i];
+                scene.addChild(stageClearTimeLabel);  //ステージクリア合計タイム
+                totalTime += parseFloat(stageClearTimeArray[i]);
+                }
+                //ペナルティ　（ダメージ回数×10秒を加算）
+                var penalty = new Label("");
+                penalty.moveTo(scene.width/2 +230, 435);
+                penalty.color = 'white';
+                penalty.font = '16px "Arial"';
+                penalty.text = "ダメージ回数×10："+ core.playerDamgeNum + "×"+ 10;
+                scene.addChild(penalty);
+                totalTime += parseInt(core.playerDamgeNum * 10);
+                //点線
+                var line = new Label("ーーーーーーーーー");
+                line.moveTo(scene.width/2 +230, 450);
+                line.color = 'white';
+                line.font = '24px "Arial"';
+                scene.addChild(line);
+                //合計タイム
+                var totalTimeLabel = new Label("");
+                totalTimeLabel.moveTo(scene.width/2 +230, 470);
+                totalTimeLabel.color = 'white';
+                totalTimeLabel.font = '24px "Arial"';
+                totalTimeLabel.text = "TOTAL  ：" + totalTime.toFixed(2);
+                scene.addChild(totalTimeLabel);
+                //合計タイムをローカルストレージに保存
+                if (!localStorage.getItem("totalTime")) { //もしローカルストレージのがnullだったら999.99を保存
+                  localStorage.setItem("totalTime", JSON.stringify(999.99));
+                }
+                //合計クリアタイムを更新したかどうか判別（問題あり）
+                if (totalTime.toFixed(2) < parseFloat(JSON.parse(localStorage.getItem("totalTime"))) ) {
+                  localStorage.setItem("totalTime", JSON.stringify(totalTime.toFixed(2)));     //合計クリアタイム更新
+                  rankPlayer.color = 'gold';
+                }
+                //プレイヤーランクの場所に合計クリアタイムを表示
+                rankPlayer.text = totalTime.toFixed(2);
+                scene.addChild(rankPlayer);
+                //ツイート内容の変更
+                e._element.innerHTML = "<p><a id=\"tweet\" href=\"https://twitter.com/intent/tweet?hashtags=moyaminC_taoshita&text=「TOTAL TIME: "+rankPlayer.text+"」ですべてのmoyaminCを倒しました！&url=https://jugjug7531.github.io/moyaminC_taosu/\" target=\"_blank\">Tweet</a></p>"
+            }
             scene.addChild(rank);
-            scene.addChild(rankPlayer);
-            scene.addChild(rankGameoverNum);
             scene.addChild(rankPlayerDamageNum);
             scene.addChild(button);
-          //  scene.addChild(retryButton);
+            scene.addChild(e);
         });
         //タイトル画面に戻るボタンを押した時のアクション
         button.ontouchstart = function(){
@@ -1189,10 +1279,6 @@ window.onload = function() {
           core.playerDamgeNum = 0;  //被ダメージ合計回数をリセット
           core.replaceScene(createGameStartScene());  //タイトル画面に戻る
         }
-        // //再戦するボタンを押した時のアクション
-        // retryButton.ontouchstart = function(){
-        //   core.replaceScene(createGameScene(stageNumber));  //ラストステージを再挑戦
-        // }
         return scene;
     }
 
@@ -1217,13 +1303,13 @@ window.onload = function() {
       howToPlay.font = '24px "Arial"';
       scene.addChild(howToPlay);
       //操作説明
-      var howToPlay = new Label("ポーズ画面：Pキー");
-      howToPlay.width = 400;
-      howToPlay.x = scene.width / 2 - howToPlay.width /2;
-      howToPlay.y = 300;
-      howToPlay.color = 'white';
-      howToPlay.font = '18px "Arial"';
-      scene.addChild(howToPlay);
+      var howToPlay2 = new Label("ポーズ画面：Pキー（BGMと効果音の音量調整ができます）");
+      howToPlay2.width = 500;
+      howToPlay2.x = scene.width / 2 - howToPlay.width /2;
+      howToPlay2.y = 300;
+      howToPlay2.color = 'white';
+      howToPlay2.font = '18px "Arial"';
+      scene.addChild(howToPlay2);
       //バージョン表示
       var verLabel = new Label("Ver. " + VERSION)
       verLabel.x = 10;
@@ -1254,6 +1340,41 @@ window.onload = function() {
       }
       scene.addChild(rankLabel);
 
+      //タイムアタックモード解禁（RANK：S以上）
+      if (localStorage.getItem("rankPlayerText") == "S" || localStorage.getItem("rankPlayerText") == "SS" || localStorage.getItem("rankPlayerText") == "MASTER") {
+        //「BEST TIME：」の文字を表示
+        var time = new Label("BEST TIME：");
+        time.x = 725;
+        time.y = 45;
+        time.color = 'white';
+        time.font = '18px "Arial"';
+        scene.addChild(time);
+        //ベストタイム表示
+        var timeLabel = new Label("");
+        timeLabel.x = time.x + 115;
+        timeLabel.y = 40;
+        if (localStorage.getItem("totalTime") == null) {
+          timeLabel.text = '999.99';
+          timeLabel.font = '24px "Arial"';
+          timeLabel.color = 'white';
+        } else {
+          timeLabel.text = JSON.parse(localStorage.getItem("totalTime"));
+          timeLabel.font = '24px "Arial"';
+          timeLabel.font = '24px "Arial"';
+          timeLabel.color = 'white';
+        }
+        scene.addChild(timeLabel);
+        //タイムアタックモード開始ボタン
+        var button = new Button("Speed Run!", "light");
+        button.x = scene.width / 2 + 100;
+        button.y = 360;
+        button.scale(1.5);
+        scene.addChild(button);
+        //ボタンを押した時のアクション
+        button.ontouchstart = function(){
+          core.replaceScene(createGameScene(1, 1));
+        }
+      }
       //スタートボタン
       var button = new Button("Play!", "light");
       button.x = scene.width / 2 - 80;
@@ -1262,7 +1383,7 @@ window.onload = function() {
       scene.addChild(button);
       //ボタンを押した時のアクション
       button.ontouchstart = function(){
-        core.replaceScene(createGameScene(1));
+        core.replaceScene(createGameScene(1, 0));
       }
       //リセットボタン
       var resetbutton = new Button("Reset", "dark");
@@ -1272,9 +1393,10 @@ window.onload = function() {
       scene.addChild(resetbutton);
       //ボタンを押した時のアクション
       resetbutton.ontouchstart = function(){
-        var answer = confirm('リセットしますか？最高プレイヤーランクが消えます。');
+        var answer = confirm('リセットしますか？最高プレイヤーランクやベストクリアタイムが消えます.');
         if (answer) {
           //このゲームに関連するローカルストレージのデータを全消去
+          localStorage.removeItem("totalTime");
           localStorage.removeItem("rankcount");
           localStorage.removeItem("rankPlayerText");
           localStorage.removeItem("rankPlayerColor");

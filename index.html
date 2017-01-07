@@ -13,6 +13,9 @@
             margin: 0;
             padding: 0;
         }
+        div.honbun {
+          margin: 0px 10px;
+        }
         p {
             position:relative;
             left:550px;
@@ -26,10 +29,11 @@
 
             border-radius: 10px;
         }
-        span#master {color: red}
-        li.game{
-            color: red;
-        }
+        span.bold {font-weight: bold;}
+        span#kaikin {color: red;}
+        span#master {color: red;}
+        li.game {color: red;}
+        li.oodai {color: blue;}
         a#tweet {text-decoration: none;}
         a#tweet:link{
           color: #ffffff;
@@ -53,6 +57,7 @@
 <title>moyaminCを倒すゲーム</title>
 <body>
   <div id="enchant-stage" style="width:960px;height:540px"></div>
+  <div class="honbun">
   <h5>"moyaminCを倒すゲーム" をTwitterで共有する</h5>
   <a href="https://twitter.com/share" class="twitter-share-button" data-via="jugjugcarry" data-size="large" data-hashtags="moyaminC_taosu">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
   <h2>操作方法</h2>
@@ -63,9 +68,14 @@
     </ul>
   <h2>プレイヤーランクについて</h2>
   全ステージをクリアするとプレイヤーランクが表示されます.<br>
-  プレイヤーランクは, ゲームオーバーになった回数とダメージを受けた回数によって決定されます.<br>
+  プレイヤーランクは, <span class="bold">ゲームオーバーになった回数とダメージを受けた回数</span>によって決定されます.<br>
   プレイヤーランクは, 高い方から順に「MASTER, SS, S, A, B, C, D, E」となります.<br>
   「<span id="master">RANK：MASTER</span>」を目指して頑張りましょう！
+  <h2>タイムアタックモード（Speed Run）について</h2>
+  タイムアタックモード（Speed Run）は全ステージクリアするまでにかかった時間を測定します.<br>
+  ゲームオーバーになった時点で即終了です. <br>
+  また, ダメージを受けると<span class="bold">ペナルティとして「ダメージを受けた回数×10」秒が加算されます.</span><br>
+  <span id="kaikin">タイムアタックモードは「RANK：S」以上で解禁されます.</span>
   <h4>使用画像および使用BGM効果音</h4>
     <ul>
       <li><a href="http://mfstg.web.fc2.com/material/index.html" target="_blank">シューティングゲーム用ドット絵フリー素材｜RECLUSE</a></li>
@@ -153,10 +163,15 @@
 <li>プレイヤーランクSSの条件を<br>「ゲームオーバー回数:0, ダメージを受けた回数:4回以内」から<br>「ゲームオーバー回数:0, ダメージを受けた回数:2回以内」に変更しました.</li>
 </ul>
 </li>
+<li class="oodai">ver. 2.0<ul>
+<li class="game">タイムアタックモード（Speed Run）を追加しました！（「RANK：S」以上で解禁）</li>
+</ul>
+</li>
 </ul>
 </li>
 
-</ul>
 
+</ul>
+  </div>
 </body>
 </html>
