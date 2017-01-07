@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '1.3.4';  //変更したらバージョンを書き換える
+var VERSION = '1.3.5';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -162,7 +162,7 @@ window.onload = function() {
         switch (num) {
           case 1: return 100; //100
             break;
-          case 2: return 105; //105
+          case 2: return 103; //103
             break;
           case 3: return 150; //150
             break;
@@ -197,6 +197,7 @@ window.onload = function() {
       }
     };
     sound.initialize();
+
     //プレイヤーを作成するクラス
     var Player = Class.create(Sprite, {
         initialize: function(scene){
@@ -211,10 +212,21 @@ window.onload = function() {
           this.y = core.height/2;
           scene.addChild(this);
         },
+        //当たり判定用のSpriteを作成する
+        hitbox: function (scene) {
+          var hitBoxScale = 0.5; //プレイヤーの大きさに対するhitBoxの大きさ
+          var hitBoxScaleX = Math.round(this.width * hitBoxScale);  //0.5なら25
+          var hitBoxScaleY = Math.round(this.height * hitBoxScale); //0.5なら12
+          var hitBox = new Sprite(hitBoxScaleX, hitBoxScaleY); //当たり判定用のSprite
+          hitBox.x = this.x + (this.width - hitBox.width)/2;
+          hitBox.y = this.y + (this.height - hitBox.height)/2;
+          scene.addChild(hitBox);
+          return hitBox;
+        },
         //自機がobj(敵)と当たったか判定するメソッド (sceneのイベントリスナー内で呼び出すこと)
-        hit: function(obj, scene){
+        hit: function(obj, scene, playerHitBox){
             //ライフのあるobjに当たった場合
-            if (player.intersect(obj) && obj.life > 0) {
+            if (playerHitBox.intersect(obj) && obj.life > 0) {
               //自機のライフがまだある時
               if (player.life - 1 > 0 && (player.barrier == false)) {
                 player.damage();        //ダメージアクション
@@ -234,17 +246,17 @@ window.onload = function() {
           this.life -= 1;         //ライフ１削る
           core.playerDamgeNum++;  //被ダメージ合計回数を1増やす
           player.opacity = 0.5;   //半透明になる
-          //無敵時間（3秒）
+          //無敵時間（2.5秒）
           setTimeout(function(){
             player.barrier = false;   //無敵解除
             player.opacity = 1;       //半透明解除
-          },3000);
-          //ダメージアクション（左右に30度傾く ２往復）
-          player.tl.rotateTo(30, this.damageTime/8, BACK_EASEOUT);
-          player.tl.rotateTo(-30, this.damageTime/8);
-          player.tl.rotateTo(30, this.damageTime/4);
-          player.tl.rotateTo(-30, this.damageTime/2);
-          player.tl.rotateTo(0, this.damageTime/2, BACK_EASEOUT);
+          },2500);
+          //ダメージアクション（左右に30度傾く ２往復）(合計60フレーム = 2秒)
+          player.tl.rotateTo(30, 5, BACK_EASEOUT);
+          player.tl.rotateTo(-30, 5);
+          player.tl.rotateTo(30, 10);
+          player.tl.rotateTo(-30, 20);
+          player.tl.rotateTo(0, 20, BACK_EASEOUT);
         },
         //死んだ時のエフェクト
         dead: function(scene) {
@@ -280,31 +292,39 @@ window.onload = function() {
           }
         },
         //プレイヤーの動き方
-        move: function(x, y){
+        move: function(x, y, obj){
           var playerMaxSpeed = 7;     //プレイヤーの最高スピード
-          if(this.playFlag == true){
+          if(this.playFlag == true){  //ボス撃破（playFlag = false）なら動かない
             if (core.input.left) {
-              if (x >= 0) {
+              if (x >= (this.width - obj.width)/2) {  //左方向の限界
                 x -= playerMaxSpeed;
               }
             }
             if (core.input.right) {
-              if (x <= 960 - 50) {
+              if (x <= 960 - this.width + (this.width - obj.width)/2) { //右方向の限界
                 x += playerMaxSpeed;
               }
             }
             if (core.input.up) {
-              if (y >= 0) {
+              if (y >= (this.height - obj.height)/2) {  //上方向の限界
                 y -= playerMaxSpeed;
               }
             }
             if (core.input.down) {
-              if (y <= 540 - 23) {
+              if (y <= 540 - this.height + (this.height - obj.height)/2) {  //下方向の限界
                 y += playerMaxSpeed;
               }
             }
-            this.x = x;
-            this.y = y;
+            obj.x = x;
+            obj.y = y;
+          }
+        },
+        moveTouch: function(e) {
+          var playerMaxSpeed = 7;     //プレイヤーの最高スピード
+          if(this.playFlag == true){  //ボス撃破（playFlag = false）なら動かない
+
+            this.x = e.x;
+            this.y = e.y;
           }
         }
     });
@@ -379,9 +399,9 @@ window.onload = function() {
             case 2: this.life = 70; //ステージ2のボスの体力 70
               break;
             case 3:
-              this.life = 90 - core.gameoverNum * 3;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに3ずつ減る（以前のステージでのゲームオーバーも含む）
-              if (this.life < 60) {
-                this.life = 60;       //下限は60
+              this.life = 90 - core.gameoverNum * 5;  //ステージ3のボスの体力 90 ただしゲームオーバーするごとに5ずつ減る（以前のステージでのゲームオーバーも含む）
+              if (this.life < 40) {
+                this.life = 40;       //下限は40
               }
               break;
             default:
@@ -482,20 +502,20 @@ window.onload = function() {
 
     //敵弾を作成するクラス
     var EnemyTama = Class.create(Sprite, {
-        initialize: function(scene, x, y, boss, xAngle, yAngle){
+        initialize: function(scene, x, y, boss, xAngle, yAngle, playerHitBox){
           Sprite.call(this, 16, 16);
           this.image = core.assets[BOSS_TAMA_IMG];
           this.x = x;         //数字は発射位置の調整
           this.y = y;         //数字は発射位置の調整
           this.speed = 10;        //弾の進むスピード
           this.interval = 100;    //連射間隔
-          this.onFrame(scene, xAngle, yAngle);
+          this.onFrame(scene, xAngle, yAngle, playerHitBox);
         },
         //敵弾の進み方 (弾の生成条件はcreateGameSceneの中でおこなう)
-        onFrame: function(scene, xAngle, yAngle){
+        onFrame: function(scene, xAngle, yAngle, playerHitBox){
           this.addEventListener('enterframe', function(){
             //弾がプレイヤーに当たったかチェック
-            this.hitBullet(scene);
+            this.hitBullet(scene, playerHitBox);
             this.x += this.speed * xAngle;;
             this.y += this.speed * yAngle;
             //端までいったら消える
@@ -509,9 +529,9 @@ window.onload = function() {
           });
         },
         //敵弾がプレイヤーと当たったか判定するメソッド
-        hitBullet: function(scene){
+        hitBullet: function(scene, playerHitBox){
             //プレイヤーに当たった場合
-            if (this.intersect(player) && player.playFlag == true) {
+            if (this.intersect(playerHitBox) && player.playFlag == true) {
               //プレイヤーのライフがまだある時
               if (player.life - 1 > 0 && (player.barrier == false)) {
                 player.damage();        //ダメージアクション
@@ -555,7 +575,7 @@ window.onload = function() {
         abo.text = "アボカドアボボ";         //ステージ１で登場したときのセリフ
       } else if (stageNumber == 2) {
         abo.x = boss.x - 60;
-        abo.text = "ふふふ...ふっかーつ！";          //ステージ２で登場したときのセリフ
+        abo.text = "ふふふ...ふっかーつ！";   //ステージ２で登場したときのセリフ
       } else if (stageNumber == 3) {
         abo.x = boss.x - 60;
         abo.text = "ラストバトルをやる";    //ステージ３で登場したときのセリフ
@@ -630,11 +650,22 @@ window.onload = function() {
       timeLabel.font = '24px "Arial"';
       timeLabel.pause = false;
       scene.addChild(timeLabel);
+      playerHitBox = player.hitbox(scene);
+      var time = 0;
+      // scene.addEventListener('TOUCH_START', function(e){
+      //   // タッチイベントは、タッチした座標をe.x , e.y として取る
+      //   //ボス登場シーン終了後, プレイヤーは移動可能
+      //   if (boss.age > bossAppearTime) {
+      //     player.moveTouch(e);
+      //   }
+      // });
+      // phbX = playerHitBox.x - (player.width - playerHitBox.width)/2;
+      // phbY = playerHitBox.y - (player.height - playerHitBox.height)/2
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
         if (boss.age - bossAppearTime == 1) {
           //制限時間を減らす（タイムラベルのイベントリスナー）
-          var time = 0;
+          // var time = 0;
           timeLabel.addEventListener('enterframe', function() {
             time += 1 / core.fps; //１フレームあたりで進む秒数
             //時間が減る条件（制限時間内かつゲームクリアしてないかつゲームオーバーしてないかつポーズ画面中でない）
@@ -650,7 +681,9 @@ window.onload = function() {
         }
         //ボス登場シーン終了後, プレイヤーは移動可能
         if (boss.age > bossAppearTime) {
-          player.move(player.x, player.y);
+          player.move(player.x, player.y, player);
+          player.move(playerHitBox.x, playerHitBox.y, playerHitBox);
+          // player.move(phbX, phbY, playerHitBox);
         }
         //ボタンを押したら自弾発射(ボス登場シーン終了後 ＆ プレイヤーのライフあり & プレイヤー無敵時間以外 & 連射感覚守る)
         if (core.input.a && boss.age > bossAppearTime && player.life > 0 && player.barrier == false && flag == true) {
@@ -673,19 +706,19 @@ window.onload = function() {
       //敵弾の発射パターン //initialize: function(scene, x, y, boss, xAngle, yAngle)
         if ((boss.age - bossAppearTime) >= 0 && gameoverFlag == false) {
         //発射した弾がプレイヤーに当たったか判定
-          player.hit(boss, scene);
+          player.hit(boss, scene, playerHitBox);
         //通常時（一定時間ごとに発射）
           //ステージ１のとき（16フレーム毎）
           if (stageNumber == 1 && boss.pattern == 0 && (boss.age - bossAppearTime) % 16 == 0) {
-            var enemyTama = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, -1, 0);
+            var enemyTama = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, -1, 0, playerHitBox);
             scene.addChild(enemyTama);
           //ステージ２のとき（12フレーム毎）
           } else if (stageNumber == 2 && boss.pattern == 0 && (boss.age - bossAppearTime) % 12 == 0) {
-            var enemyTama = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, -1, 0);
+            var enemyTama = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, -1, 0, playerHitBox);
             scene.addChild(enemyTama);
           //ステージ３のとき（8フレーム毎）
           } else if (stageNumber == 3 && boss.pattern == 0 && (boss.age - bossAppearTime) % 8 == 0) {
-            var enemyTama = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, -1, 0);
+            var enemyTama = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, -1, 0, playerHitBox);
             scene.addChild(enemyTama);
           }
         //ランダム方向
@@ -694,7 +727,7 @@ window.onload = function() {
             var random = Math.PI * rand(360) / 180;           // 1度 = Math.PI / 180
             var xAngle = Math.sin(random);                    // sin(theta)
             var yAngle = Math.cos(random);                    // cos(theta)
-            var enemyTama1 = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, xAngle, yAngle);
+            var enemyTama1 = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, xAngle, yAngle, playerHitBox);
             enemyTama1.speed = 4;                              //　弾のスピード（ゆっくり）
             scene.addChild(enemyTama1);
           //ステージ3のとき
@@ -702,7 +735,7 @@ window.onload = function() {
             var random = Math.PI * rand(360) / 180;           // 1度 = Math.PI / 180
             var xAngle = Math.sin(random);                    // sin(theta)
             var yAngle = Math.cos(random);                    // cos(theta)
-            var enemyTama1 = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, xAngle, yAngle);
+            var enemyTama1 = new EnemyTama(scene, boss.x, boss.y + boss.height/2, boss, xAngle, yAngle, playerHitBox);
             enemyTama1.speed = rand(6) + 1;                   //　弾のスピード（ランダム：1〜７）
             scene.addChild(enemyTama1);
           }
@@ -713,10 +746,10 @@ window.onload = function() {
             var yAngle = Math.cos(random);                    // cos(theta)
             var xAngleAddRight = Math.sin(random+Math.PI/2);  // sin(theta + PI/2)
             var yAngleAddRight = Math.cos(random+Math.PI/2);  // cos(theta + PI/2)
-            ranTama = new EnemyTama(scene, core.width/2, core.height/2, boss, xAngle, yAngle);
-            ranTama2 = new EnemyTama(scene, core.width/2, core.height/2, boss, -xAngle, -yAngle);
-            ranTama3 = new EnemyTama(scene, core.width/2, core.height/2, boss, xAngleAddRight, yAngleAddRight);
-            ranTama4 = new EnemyTama(scene, core.width/2, core.height/2, boss, -xAngleAddRight, -yAngleAddRight);
+            ranTama = new EnemyTama(scene, core.width/2, core.height/2, boss, xAngle, yAngle, playerHitBox);
+            ranTama2 = new EnemyTama(scene, core.width/2, core.height/2, boss, -xAngle, -yAngle, playerHitBox);
+            ranTama3 = new EnemyTama(scene, core.width/2, core.height/2, boss, xAngleAddRight, yAngleAddRight, playerHitBox);
+            ranTama4 = new EnemyTama(scene, core.width/2, core.height/2, boss, -xAngleAddRight, -yAngleAddRight, playerHitBox);
           //ステージ１のとき（4フレーム毎 2方向）
             if (boss.pattern == 2 && stageNumber == 1 && (boss.age - bossAppearTime) % 4 == 0) {
               scene.addChild(ranTama);
@@ -736,9 +769,13 @@ window.onload = function() {
             }
           }
         }
-
+console.log((time));
       //プレイヤーのライフが0もしくは時間切れになったらゲームオーバーシーンに移動
         if ((player.life == 0 || sound.bgmLength(stageNumber) - time <= 0) && gameoverFlag == false) {
+          if (sound.bgmLength(stageNumber) - time <= 0) {
+            player.dead(scene);
+            scene.removeChild(playerHitBox);
+          }
           gameoverFlag = true;    //ゲームオーバーフラッグを立てることで敵弾発射回避
           boss.tl.clear();        //ボスの動きストップ
           core.gameoverNum++;     //ゲームオーバーの合計回数を1増やす
@@ -1013,7 +1050,7 @@ window.onload = function() {
           moyaminC[i] = new Sprite(80, 80);
           moyaminC[i].image = core.assets[BOSS_IMG];
           moyaminC[i].frame = i;
-          moyaminC[i].x = 230 + 120 * i;
+          moyaminC[i].x = 250 + 110 * i;
           moyaminC[i].y = 45;
         }
         //プレイヤーランクを表示
