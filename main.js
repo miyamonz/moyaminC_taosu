@@ -713,8 +713,8 @@ window.onload = function() {
           player.move(playerHitBox.x, playerHitBox.y, playerHitBox);
           // player.move(phbX, phbY, playerHitBox);
         }
-        //ボタンを押したら自弾発射(ボス登場シーン終了後 ＆ プレイヤーのライフあり & プレイヤー無敵時間以外 & 連射感覚守る)
-        if (core.input.a && boss.age > bossAppearTime && player.life > 0 && player.barrier == false && flag == true) {
+        //ボタンを押したら自弾発射(ボス登場シーン終了後 ＆ ゲームオーバーになっていない & プレイヤー無敵時間以外 & 連射感覚守る)
+        if (core.input.a && boss.age > bossAppearTime && gameoverFlag == false && player.barrier == false && flag == true) {
           //"flag = false" 中はボタンを押しても弾が出ないようにする
           flag = false;
           player.frame = 1;
