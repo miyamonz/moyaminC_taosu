@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '2.0';  //変更したらバージョンを書き換える
+var VERSION = '2.1';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
