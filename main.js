@@ -1,5 +1,5 @@
 enchant();
-var VERSION = '2.1';  //変更したらバージョンを書き換える
+var VERSION = '2.2';  //変更したらバージョンを書き換える
 
 //ゲームで使用する画像
 var TITLE_IMG = './image/title.png'
@@ -679,13 +679,19 @@ window.onload = function() {
       scene.addChild(timeLabel);
       playerHitBox = player.hitbox(scene);
       var time = 0;
-      // scene.addEventListener('touchmove', function(e){
-      //   // タッチイベントは、タッチした座標をe.x , e.y として取る
-      //   //ボス登場シーン終了後, プレイヤーは移動可能
-      //   if (boss.age > bossAppearTime) {
-      //     player.moveTouch(e);
-      //   }
-      // });
+      var playerX = 0;
+      var playerY = 0;
+      // 最初のタッチ時にタッチした初期位置と主人公位置の差分を取得
+      scene.addEventListener("touchstart", function(e){
+        playerX = player.x - e.x;
+        playerY = player.y - e.y;
+      });
+      // 指を動かしたときに主人公が相対的に移動する
+      scene.addEventListener("touchmove", function(e){
+        player.x = playerX + e.x;
+        player.y = playerY + e.y;
+      });
+
       //シーンのイベントリスナー
       scene.addEventListener('enterframe', function(){
         if (boss.age - bossAppearTime == 1) {
@@ -698,12 +704,19 @@ window.onload = function() {
             }
             //時間が減る条件（制限時間内かつゲームクリアしてないかつゲームオーバーしてないかつポーズ画面中でない）
             if (sound.bgmLength(stageNumber) - time > 0 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false) {
-              timeLabel.text = "Time: " + (sound.bgmLength(stageNumber) - time).toFixed(2);  //BGM全体の長さから引く(BGMが終わったら時間切れ)
-              //残り時間30秒を切ったら赤色に変える
-              if (sound.bgmLength(stageNumber) - time < 30 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false){
-                timeLabel.color = 'orangered';
-                timeLabel.tl.scaleTo(1.5, 10);
+              //通常モードの時のタイム表示
+              if (stageMode == 0) {
+                timeLabel.text = "Time: " + (sound.bgmLength(stageNumber) - time).toFixed(2);  //BGM全体の長さから引く(BGMが終わったら時間切れ)
+                //残り時間30秒を切ったら赤色に変える
+                if (sound.bgmLength(stageNumber) - time < 30 && gameClearFlag == false && gameoverFlag == false && timeLabel.pause == false){
+                  timeLabel.color = 'orangered';
+                  timeLabel.tl.scaleTo(1.5, 10);
+                }
+              //タイムアタックモードの時のタイム表示
+            } else if (stageMode == 1){
+                timeLabel.text = "Time: " + time.toFixed(2);  //0:00スタートでカウントアップ
               }
+
             }
           })
         }
@@ -724,7 +737,7 @@ window.onload = function() {
           //ボタン押したら弾を一発表示
           var tama = new Tama(scene, player.x, player.y);
           //発射した弾がボスに当たったか判定
-          tama.hit(boss);
+          tama.hit(scene);
           //連射間隔を守る
           setTimeout(function(){
             flag = true;
