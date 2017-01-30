@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/miyamonz/moyaminC_taosu#readme",
   "devDependencies": {
+    "exports-loader": "^0.6.3",
     "webpack": "^1.14.0",
     "webpack-dev-server": "^1.16.2"
   }
