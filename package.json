@@ -4,6 +4,7 @@
   "description": "ボス”moyaminC”を倒すだけのシューティングゲームです(身内向け).",
   "main": "main.js",
   "scripts": {
+    "serve": "browser-sync start -s -f *",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
