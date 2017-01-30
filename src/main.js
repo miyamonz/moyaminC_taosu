@@ -1,31 +1,32 @@
 enchant();
 var VERSION = '2.2';  //変更したらバージョンを書き換える
 
-//ゲームで使用する画像
-var TITLE_IMG = './image/title.png'
-var BACKGROUND_IMG = './image/cosmo.jpg'
-var PLAYER_IMG = './image/player1.png';
-var PLAYER_DEAD_IMG = './image/player_dead.png';
-var TAMA_IMG = './image/tama.png';
-var BOSS_IMG = './image/moyaminC.png';
-var BOSS_TAMA_IMG ='./image/moyaminC_grass.png'
-var MYLIFE_IMG = './icon0.png';
-var GAMEOVER_IMG = './image/gameover.png';
-var CLEAR_IMG = './image/clear.png'
-var ALLCLEAR_IMG = './image/congratulations.png'
-
-//ゲームで使用するBGM＆効果音
-var STAGE1_BGM = './sound/night3.mp3'
-var STAGE2_BGM = './sound/strained.mp3'
-var STAGE3_BGM = './sound/confront.mp3'
-var BOSS_DEAD_SE = './sound/gun.mp3'
-var BOSS_DAMAGE_SE = './sound/hit1.mp3'
-var PLAYER_DEAD_SE = './sound/taihou.mp3'
-var PLAYER_DAMAGE_SE = './sound/bomb3.mp3'
-
-var IMG = [TITLE_IMG, BACKGROUND_IMG, PLAYER_IMG, PLAYER_DEAD_IMG, TAMA_IMG, BOSS_IMG, BOSS_TAMA_IMG, MYLIFE_IMG, GAMEOVER_IMG, CLEAR_IMG, ALLCLEAR_IMG];
-var BGM = [STAGE1_BGM, STAGE2_BGM, STAGE3_BGM]
-var SE = [BOSS_DEAD_SE, BOSS_DAMAGE_SE, PLAYER_DEAD_SE, PLAYER_DAMAGE_SE];
+const LOAD = {
+    IMG: {
+        TITLE_IMG       : './image/title.png',
+        BACKGROUND_IMG  : './image/cosmo.jpg',
+        PLAYER_IMG      : './image/player1.png',
+        PLAYER_DEAD_IMG : './image/player_dead.png',
+        TAMA_IMG        : './image/tama.png',
+        BOSS_IMG        : './image/moyaminC.png',
+        BOSS_TAMA_IMG   : './image/moyaminC_grass.png',
+        MYLIFE_IMG      : './icon0.png',
+        GAMEOVER_IMG    : './image/gameover.png',
+        CLEAR_IMG       : './image/clear.png',
+        ALLCLEAR_IMG    : './image/congratulations.png',
+    },
+    BGM: {
+        STAGE1_BGM : './sound/night3.mp3',
+        STAGE2_BGM : './sound/strained.mp3',
+        STAGE3_BGM : './sound/confront.mp3',
+    },
+    SE: {
+        BOSS_DEAD_SE     : './sound/gun.mp3',
+        BOSS_DAMAGE_SE   : './sound/hit1.mp3',
+        PLAYER_DEAD_SE   : './sound/taihou.mp3',
+        PLAYER_DAMAGE_SE : './sound/bomb3.mp3',
+    }
+}
 
 window.onload = function() {
 
@@ -39,9 +40,9 @@ window.onload = function() {
     return core.pushScene(scene);
   }
   //ゲームで使用する画像およびBGM等を読み込む
-  core.preload(IMG);  //画像データをあらかじめ読み込む
-  core.preload(BGM);  //BGMデータをあらかじめ読み込む
-  core.preload(SE);  //SEデータをあらかじめ読み込む
+  core.preload(Object.values(LOAD.IMG));
+  core.preload(Object.values(LOAD.BGM));
+  core.preload(Object.values(LOAD.SE));
   //fps設定
   core.fps = 30;
   //BGM&効果音のマスター音量
@@ -97,7 +98,7 @@ window.onload = function() {
       },
       // プレイヤーがダメージを受けた時のSE
       playerDamageSe: function(play) {  //0でそのものを返す 1で再生 2で音量初期化
-        var se = core.assets[PLAYER_DAMAGE_SE];
+        var se = core.assets[LOAD.SE.PLAYER_DAMAGE_SE];
         if (play == 1) {
           se.play();     //Se再生
         } else if (play == 2) {
@@ -106,7 +107,7 @@ window.onload = function() {
         return se;
       },
       playerDeadSe: function(play) {  //1で再生 2で音量初期化
-        var se = core.assets[PLAYER_DEAD_SE];
+        var se = core.assets[LOAD.SE.PLAYER_DEAD_SE];
         if (play == 1) {
           se.play();     //Se再生
         } else if (play == 2) {
@@ -116,7 +117,7 @@ window.onload = function() {
       },
       //ボスがダメージを受けた時のSE
       bossDamageSe: function(play) {  //1で再生 2で音量初期化
-        var se = core.assets[BOSS_DAMAGE_SE];
+        var se = core.assets[LOAD.SE.BOSS_DAMAGE_SE];
         if (play == 1) {
           se.play();     //Se再生
         } else if (play == 2) {
@@ -125,7 +126,7 @@ window.onload = function() {
         return se; //0.03
       },
       bossDeadSe: function(play) {  //1で再生 2で音量初期化
-        var se = core.assets[BOSS_DEAD_SE];
+        var se = core.assets[LOAD.SE.BOSS_DEAD_SE];
         if (play == 1) {
           se.play();     //Se再生
         } else if (play == 2) {
@@ -134,7 +135,7 @@ window.onload = function() {
         return se; //0.04
       },
       stage1Bgm: function(play) { //1で再生 2で音量初期化
-        var stageBgm = core.assets[STAGE1_BGM];
+        var stageBgm = core.assets[LOAD.BGM.STAGE1_BGM];
         if (play == 1) {
           stageBgm.play();
         } else if (play == 2){
@@ -143,7 +144,7 @@ window.onload = function() {
         return stageBgm;
       },
       stage2Bgm: function(play) { //1で再生 2で音量初期化
-        var stageBgm = core.assets[STAGE2_BGM];
+        var stageBgm = core.assets[LOAD.BGM.STAGE2_BGM];
         if (play == 1) {
           stageBgm.play();
         } else if (play == 2){
@@ -152,7 +153,7 @@ window.onload = function() {
         return stageBgm;
       },
       stage3Bgm: function(play) { //1で再生 2で音量初期化
-        var stageBgm = core.assets[STAGE3_BGM];
+        var stageBgm = core.assets[LOAD.BGM.STAGE3_BGM];
         if (play == 1) {
           stageBgm.play();
         } else if (play == 2){
@@ -204,7 +205,7 @@ window.onload = function() {
     var Player = Class.create(Sprite, {
         initialize: function(scene){
           Sprite.call(this, 50, 23);
-          this.image = core.assets[PLAYER_IMG];
+          this.image = core.assets[LOAD.IMG.PLAYER_IMG];
           this.life = 5;          //プレイヤーのライフ
           this.myLifeLabel = [];
           this.damageTime = 40;   //ダメージ受けた時のアクション合計時間(8の倍数？)
@@ -264,7 +265,7 @@ window.onload = function() {
         dead: function(scene) {
           core.playerDamgeNum++;  //被ダメージ合計回数を1増やす
           var playerDead = new Sprite(96, 96);
-          playerDead.image = core.assets[PLAYER_DEAD_IMG];
+          playerDead.image = core.assets[LOAD.IMG.PLAYER_DEAD_IMG];
           playerDead.x = player.x - 23; //爆発画像が中心に来るように調整
           playerDead.y = player.y - 32; //爆発画像が中心に来るように調整
           scene.removeChild(player);
@@ -284,7 +285,7 @@ window.onload = function() {
         lifeLabel: function(scene){
           for (var i = 0; i < this.life; i++) {
             var label = new Sprite(16,16);
-            label.image = core.assets[MYLIFE_IMG];
+            label.image = core.assets[LOAD.IMG.MYLIFE_IMG];
             label.frame = 10;
             label.scale(2);
             label.x = 45 + 40 * i;
@@ -356,7 +357,7 @@ window.onload = function() {
     var Tama = Class.create(Sprite, {
         initialize: function(scene, x, y){
           Sprite.call(this, 27, 3);
-          this.image = core.assets[TAMA_IMG];
+          this.image = core.assets[LOAD.IMG.TAMA_IMG];
           this.x = x + 48;        //数字は発射位置の調整
           this.y = y + 9;         //数字は発射位置の調整
           this.speed = 20;        //弾の進むスピード
@@ -406,7 +407,7 @@ window.onload = function() {
         //初期化メソッド
         initialize: function(scene, stageNumber){
           Sprite.call(this, 80, 80);
-          this.image = core.assets[BOSS_IMG];
+          this.image = core.assets[LOAD.IMG.BOSS_IMG];
           this.frame = 0;
           this.center = (core.height - this.height)/2;
           this.centerX = (core.width - this.width)/2;
@@ -527,7 +528,7 @@ window.onload = function() {
     var EnemyTama = Class.create(Sprite, {
         initialize: function(scene, x, y, boss, xAngle, yAngle, playerHitBox){
           Sprite.call(this, 16, 16);
-          this.image = core.assets[BOSS_TAMA_IMG];
+          this.image = core.assets[LOAD.IMG.BOSS_TAMA_IMG];
           this.x = x;         //数字は発射位置の調整
           this.y = y;         //数字は発射位置の調整
           this.speed = 10;        //弾の進むスピード
@@ -580,7 +581,7 @@ window.onload = function() {
       //背景
       var scene = new Scene();
       var backGround = new Sprite(960, 540);
-      backGround.image = core.assets[BACKGROUND_IMG];
+      backGround.image = core.assets[LOAD.IMG.BACKGROUND_IMG];
       scene.addChild(backGround);
       //プレイヤー配置
       player = new Player(scene);
@@ -971,7 +972,7 @@ window.onload = function() {
     var createGameOverScene = function(boss, stageLabel, stageNumber, timeLabel, stageMode){
       var scene = new Scene();
       var backGround = new Sprite(960, 540);
-      backGround.image = core.assets[BACKGROUND_IMG];
+      backGround.image = core.assets[LOAD.IMG.BACKGROUND_IMG];
       scene.addChild(backGround);
       scene.addChild(stageLabel);
       scene.addChild(boss);
@@ -979,7 +980,7 @@ window.onload = function() {
       boss.lifeLabel(scene);
       //ゲームオーバーの文字
       var gameover = new Sprite(189, 97);
-      gameover.image = core.assets[GAMEOVER_IMG];
+      gameover.image = core.assets[LOAD.IMG.GAMEOVER_IMG];
       gameover.scale(2.8);
       gameover.x = (core.width - gameover.width) / 2 ;
       gameover.y = 175;
@@ -1020,7 +1021,7 @@ window.onload = function() {
     var createGameClearScene = function(player, stageLabel, stageNumber, timeLabel, stageMode){
         var scene = new Scene();
         var backGround = new Sprite(960, 540);
-        backGround.image = core.assets[BACKGROUND_IMG];
+        backGround.image = core.assets[LOAD.IMG.BACKGROUND_IMG];
         scene.addChild(backGround);
         scene.addChild(player);
         scene.addChild(stageLabel);
@@ -1030,7 +1031,7 @@ window.onload = function() {
         }
         //ゲームクリアの文字
         var clearLabel = new Sprite(267, 48)
-        clearLabel.image = core.assets[CLEAR_IMG];
+        clearLabel.image = core.assets[LOAD.IMG.CLEAR_IMG];
         clearLabel.scale(2.8);
         clearLabel.x = (scene.width - clearLabel.width) / 2 ;
         clearLabel.y = 190;
@@ -1086,7 +1087,7 @@ window.onload = function() {
     var createGameAllClearScene = function(player, stageLabel, stageNumber, timeLabel, stageMode){
         var scene = new Scene();
         var backGround = new Sprite(960, 540);
-        backGround.image = core.assets[BACKGROUND_IMG];
+        backGround.image = core.assets[LOAD.IMG.BACKGROUND_IMG];
         scene.addChild(backGround);
         scene.addChild(player);
         scene.addChild(stageLabel);
@@ -1096,13 +1097,13 @@ window.onload = function() {
         }
         //Congratulations!の文字を表示
         var clearLabel = new Sprite(540, 100)
-        clearLabel.image = core.assets[ALLCLEAR_IMG];
+        clearLabel.image = core.assets[LOAD.IMG.ALLCLEAR_IMG];
         clearLabel.x = (core.width - clearLabel.width) / 2 ;
         clearLabel.y = 190;
         clearLabel.scale(1.2);
         //moyaminCの画像を表示
         var moyamins = new Sprite(80, 80);
-        moyamins.image = core.assets[BOSS_IMG];
+        moyamins.image = core.assets[LOAD.IMG.BOSS_IMG];
         moyamins.frame = 3;
         moyamins.scale(1.2);
         moyamins.x = 750;
@@ -1117,7 +1118,7 @@ window.onload = function() {
         var moyaminC = [];
         for (var i = 0; i < 5; i++) {
           moyaminC[i] = new Sprite(80, 80);
-          moyaminC[i].image = core.assets[BOSS_IMG];
+          moyaminC[i].image = core.assets[LOAD.IMG.BOSS_IMG];
           moyaminC[i].frame = i;
           moyaminC[i].x = 250 + 110 * i;
           moyaminC[i].y = 85;
@@ -1299,11 +1300,11 @@ window.onload = function() {
     var createGameStartScene = function(){
       var scene = new Scene();
       var backGround = new Sprite(960, 540);
-      backGround.image = core.assets[BACKGROUND_IMG];
+      backGround.image = core.assets[LOAD.IMG.BACKGROUND_IMG];
       scene.addChild(backGround);
       //タイトル文字
       var title = new Sprite(645,90);
-      title.image = core.assets[TITLE_IMG];
+      title.image = core.assets[LOAD.IMG.TITLE_IMG];
       title.x = (scene.width - title.width) / 2;
       title.y = 100;
       scene.addChild(title);
