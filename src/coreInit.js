@@ -16,8 +16,6 @@ module.exports = function (core) {
   //fps設定
   core.fps = 30;
   //BGM&効果音のマスター音量
-  core.masterBgm = 0;
-  core.masterSe = 0;
   core.gameoverNum = 0;     //ゲームオーバーになった合計回数
   core.playerDamgeNum = 0;  //プレイヤーが受けたダメージの合計回数
   core.bolumeStep = Math.round((0.04/100)*1000)/1000; //0.002の1/100を小数第三位まで
