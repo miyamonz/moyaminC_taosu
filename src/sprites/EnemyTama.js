@@ -1,6 +1,7 @@
 const LOAD = require("../loadFiles.js")
 
 module.exports = function(core) {
+  const sound = require("../sound.js")(core)
   return Class.create(Sprite, {
     initialize: function(scene, x, y, boss, xAngle, yAngle, playerHitBox){
       Sprite.call(this, 16, 16);

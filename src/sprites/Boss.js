@@ -1,6 +1,7 @@
 const LOAD = require("../loadFiles.js")
 
 module.exports = function(core) {
+  const sound = require("../sound.js")(core)
   return Class.create(Sprite, {
     //初期化メソッド
     initialize: function(scene, stageNumber){
